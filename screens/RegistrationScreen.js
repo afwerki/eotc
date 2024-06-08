@@ -6,17 +6,60 @@ import {
   Text,
   TouchableOpacity,
   TextInput,
-  ScrollView
+  ScrollView,
+  Alert
 } from "react-native";
 
 const RegistrationScreen = ({ navigation }) => {
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [age, setAge] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [gender, setGender] = useState('');
+  const [maritalStatus, setMaritalStatus] = useState('');
 
-  const handleRegister = () => {
-    // Implement registration logic here
-    navigation.navigate('Login');
+  const handleRegister = async () => {
+    if (!email || !password || !firstName || !lastName || !age || !username) {
+      Alert.alert("Error", "Please fill out all fields.");
+      return;
+    }
+
+    const registrationData = {
+      first_name: firstName,
+      last_name: lastName,
+      email,
+      age,
+      username,
+      password,
+      gender,
+      marital_status: maritalStatus,
+    };
+
+    try {
+      const response = await fetch('https://ad56-148-252-146-234.ngrok-free.app/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(registrationData),
+      });
+
+      const result = await response.json();
+
+      if (response.status === 200) {
+        Alert.alert("Success", "Registration successful!");
+        navigation.navigate('Login');
+      } else {
+        Alert.alert("Error", result.message || "Registration failed.");
+      }
+    } catch (error) {
+      Alert.alert("Error", "An error occurred during registration.");
+      console.error('Error during registration:', error);
+    }
   };
+
   return (
     <ScrollView style={{ flex: 1, backgroundColor: "#fff" }}>
       <View style={styles.container}>
@@ -28,15 +71,14 @@ const RegistrationScreen = ({ navigation }) => {
         </View>
 
         <View style={styles.form}>
-          <View style={styles.input}>
-            <Text style={styles.inputLabel}>Email address</Text>
+        <View style={styles.input}>
+            <Text style={styles.inputLabel}>username</Text>
             <TextInput
               autoCapitalize="none"
               autoCorrect={false}
-              keyboardType="email-address"
-              placeholder="afe.programmer@gmail.com"
-              placeholderTextColor="#6b7280"
               style={styles.inputControl}
+              value={username}
+              onChangeText={setUsername}
             />
           </View>
 
@@ -52,8 +94,26 @@ const RegistrationScreen = ({ navigation }) => {
               placeholderTextColor="#6b7280"
               style={styles.inputControl}
               secureTextEntry={true}
+              value={password}
+              onChangeText={setPassword}
             />
           </View>
+
+          <View style={styles.input}>
+            <Text style={styles.inputLabel}>Email address</Text>
+            <TextInput
+              autoCapitalize="none"
+              autoCorrect={false}
+              keyboardType="email-address"
+              placeholder="afe.programmer@gmail.com"
+              placeholderTextColor="#6b7280"
+              style={styles.inputControl}
+              value={email}
+              onChangeText={setEmail}
+            />
+          </View>
+
+          
 
           <View style={styles.input}>
             <Text style={styles.inputLabel}>ስም/first name</Text>
@@ -61,6 +121,8 @@ const RegistrationScreen = ({ navigation }) => {
               autoCapitalize="none"
               autoCorrect={false}
               style={styles.inputControl}
+              value={firstName}
+              onChangeText={setFirstName}
             />
           </View>
 
@@ -70,30 +132,42 @@ const RegistrationScreen = ({ navigation }) => {
               autoCapitalize="none"
               autoCorrect={false}
               style={styles.inputControl}
+              value={lastName}
+              onChangeText={setLastName}
             />
           </View>
+
           <View style={styles.input}>
             <Text style={styles.inputLabel}>ፆታ/gender</Text>
             <TextInput
               autoCapitalize="none"
               autoCorrect={false}
               style={styles.inputControl}
+              value={gender}
+              onChangeText={setGender}
             />
           </View>
+
           <View style={styles.input}>
             <Text style={styles.inputLabel}>እድሜ/age</Text>
             <TextInput
               autoCapitalize="none"
               autoCorrect={false}
               style={styles.inputControl}
+              value={age}
+              onChangeText={setAge}
             />
           </View>
+         
+
           <View style={styles.input}>
-            <Text style={styles.inputLabel}>ጋብቻ/marital satus</Text>
+            <Text style={styles.inputLabel}>ጋብቻ/marital status</Text>
             <TextInput
               autoCapitalize="none"
               autoCorrect={false}
               style={styles.inputControl}
+              value={maritalStatus}
+              onChangeText={setMaritalStatus}
             />
           </View>
 
@@ -102,17 +176,17 @@ const RegistrationScreen = ({ navigation }) => {
               onPress={handleRegister}
             >
               <View style={styles.btn}>
-                <Text style={styles.btnText}>Sign in</Text>
+                <Text style={styles.btnText}>Sign up</Text>
               </View>
             </TouchableOpacity>
           </View>
 
           <TouchableOpacity
-            onPress={handleRegister}
+            onPress={() => navigation.navigate('Login')}
           >
             <Text style={styles.formFooter}>
-              Don't have an account?{" "}
-              <Text style={{ textDecorationLine: "underline" }}>Sign up</Text>
+              Already have an account?{" "}
+              <Text style={{ textDecorationLine: "underline" }}>Sign in</Text>
             </Text>
           </TouchableOpacity>
         </View>

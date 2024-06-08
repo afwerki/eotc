@@ -1,4 +1,4 @@
-import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, Image, TouchableOpacity, StyleSheet, Button } from 'react-native';
 import React from 'react';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { StatusBar } from 'expo-status-bar';
@@ -13,6 +13,15 @@ const WelcomeScreen = ({ navigation }) => {
             navigation.replace('Login');
         } catch (error) {
             console.error('Failed to save the data to the storage', error);
+        }
+    };
+
+    const clearAsyncStorage = async () => {
+        try {
+            await AsyncStorage.clear();
+            console.log('AsyncStorage cleared');
+        } catch (error) {
+            console.error('Failed to clear the AsyncStorage', error);
         }
     };
 
@@ -46,6 +55,11 @@ const WelcomeScreen = ({ navigation }) => {
                         </Text>
                     </TouchableOpacity>
                 </Animated.View>
+
+                {/* Temporary Button to Clear AsyncStorage */}
+                <View style={styles.clearButtonContainer}>
+                    <Button title="Clear Storage" onPress={clearAsyncStorage} />
+                </View>
             </LinearGradient>
         </View>
     );
@@ -93,5 +107,9 @@ const styles = StyleSheet.create({
         color: 'white',
         fontWeight: 'bold',
         letterSpacing: 2,
+    },
+    clearButtonContainer: {
+        marginTop: 20,
+        alignItems: 'center',
     },
 });

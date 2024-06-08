@@ -1,0 +1,1 @@
+I have to remove the asystorage clearance from welocme page and login page.
