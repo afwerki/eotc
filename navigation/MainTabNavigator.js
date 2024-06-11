@@ -1,19 +1,78 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import Colors from '../constants/Colors';
+import { FontAwesome5, MaterialCommunityIcons, Ionicons, Octicons } from '@expo/vector-icons';
+import { Feather } from '@expo/vector-icons';
+
 import HomeScreen from '../screens/HomeScreen';
 import NewsScreen from '../screens/NewsScreen';
 import MezmurScreen from '../screens/MezmurScreen';
 import ProjectsScreen from '../screens/ProjectsScreen';
+import ProfileScreen from '../screens/ProfileScreen';
 
 const Tab = createBottomTabNavigator();
 
 const MainTabNavigator = () => {
   return (
-    <Tab.Navigator>
-      <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="News" component={NewsScreen} />
-      <Tab.Screen name="Mezmur" component={MezmurScreen} />
-      <Tab.Screen name="Projects" component={ProjectsScreen} />
+    <Tab.Navigator
+      screenOptions={{
+        tabBarActiveTintColor: Colors.primary,
+        tabBarLabelStyle: {
+          fontFamily: 'mon-sb',
+        },
+      }}
+    >
+      <Tab.Screen
+        name="Home"
+        component={HomeScreen}
+        options={{
+          tabBarLabel: 'Home',
+          title: 'ቤተክርስቲያን',
+          tabBarIcon: ({ color, size }) => <FontAwesome5 name="home" color={color} size={size} />,
+        }}
+      />
+      <Tab.Screen
+        name="Books"
+        component={NewsScreen} // Assuming NewsScreen is temporarily used for this example
+        options={{
+          tabBarLabel: 'Books',
+          tabBarIcon: ({ color, size }) => <FontAwesome5 name="bible" color={color} size={size} />,
+        }}
+      />
+      <Tab.Screen
+        name="Mezmur"
+        component={MezmurScreen}
+        options={{
+          tabBarLabel: 'መዝሙሮች',
+          tabBarIcon: ({ color, size }) => <FontAwesome5 name="cross" color={color} size={size} />,
+        }}
+      />
+      <Tab.Screen
+        name="News"
+        component={NewsScreen}
+        options={{
+          tabBarLabel: 'News',
+          title: 'የቤተክርስቲያን ዜናዎች',
+          tabBarIcon: ({ color, size }) => <MaterialCommunityIcons name="newspaper-variant-outline" color={color} size={size} />,
+        }}
+      />
+      <Tab.Screen
+        name="Projects"
+        component={ProjectsScreen}
+        options={{
+          tabBarLabel: 'Project',
+          tabBarIcon: ({ color, size }) => <Octicons name="project" color={color} size={size} />,
+        }}
+      />
+      <Tab.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{
+          tabBarLabel: 'Project',
+          tabBarIcon: ({ color, size }) => <Feather name="settings" size={24} color="black" />,
+          
+        }}
+      />
     </Tab.Navigator>
   );
 };
