@@ -16,7 +16,7 @@ const LoginScreen = ({ navigation }) => {
     }
 
     try {
-      const response = await fetch('https://ff16-92-236-121-121.ngrok-free.app/login', {
+      const response = await fetch('https://cc11-148-252-145-153.ngrok-free.app/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -62,11 +62,15 @@ const LoginScreen = ({ navigation }) => {
 
         <TextInput
           style={styles.input}
+
+          autoCapitalize="none"
+          autoCorrect={false}
           placeholder="Username"
           placeholderTextColor='#999'
           value={username}
           onChangeText={setUsername}
         />
+
         <TextInput
           style={styles.input}
           placeholder="Password"
