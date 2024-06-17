@@ -8,7 +8,7 @@ import HomeScreen from '../screens/HomeScreen';
 import NewsScreen from '../screens/NewsScreen';
 import MezmurScreen from '../screens/MezmurScreen';
 import ProjectsScreen from '../screens/ProjectsScreen';
-import ProfileScreen from '../screens/ProfileScreen';
+import ProfileScreen_simple from '../screens/ProfileScreen_simple';
 
 const Tab = createBottomTabNavigator();
 
@@ -66,9 +66,9 @@ const MainTabNavigator = () => {
       />
       <Tab.Screen
         name="Profile"
-        component={ProfileScreen}
+        component={ProfileScreen_simple}
         options={{
-          tabBarLabel: 'Project',
+          tabBarLabel: 'Setting',
           tabBarIcon: ({ color, size }) => <Feather name="settings" size={24} color="black" />,
           
         }}

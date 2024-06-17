@@ -96,6 +96,7 @@ const ProfileScreen = () => {
                     }}
                     style={styles.avatarImg} />
 
+
                   <View style={styles.avatarNotification} />
                 </View>
 

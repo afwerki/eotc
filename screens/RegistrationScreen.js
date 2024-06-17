@@ -11,7 +11,6 @@ import {
 } from "react-native";
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { Picker } from '@react-native-picker/picker';
 
 const RegistrationScreen = ({ navigation }) => {
   const [step, setStep] = useState(1);
@@ -43,7 +42,7 @@ const RegistrationScreen = ({ navigation }) => {
     };
 
     try {
-      const response = await fetch('https://cc11-148-252-145-153.ngrok-free.app/register', {
+      const response = await fetch('https://d4f7-92-236-121-121.ngrok-free.app/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -167,38 +166,26 @@ const RegistrationScreen = ({ navigation }) => {
     <Animated.View entering={FadeInDown.delay(100).springify()} style={styles.form}>
       <View style={styles.input}>
         <Icon name="calendar" size={20} color="#007aff" style={styles.icon} />
-        <View style={styles.pickerContainer}>
-          <Picker
-            selectedValue={age}
-            style={styles.picker}
-            onValueChange={(itemValue, itemIndex) => setAge(itemValue)}
-          >
-            <Picker.Item label="Select Age Bracket" value="" />
-            <Picker.Item label="10-20" value="10-20" />
-            <Picker.Item label="21-30" value="21-30" />
-            <Picker.Item label="31-40" value="31-40" />
-            <Picker.Item label="41-50" value="41-50" />
-            <Picker.Item label="51-60" value="51-60" />
-            <Picker.Item label="61+" value="61+" />
-          </Picker>
-        </View>
+        <TextInput
+          autoCapitalize="none"
+          autoCorrect={false}
+          placeholder="Age"
+          style={styles.inputControl}
+          value={age}
+          onChangeText={setAge}
+        />
       </View>
 
       <View style={styles.input}>
         <Icon name="heart" size={20} color="#007aff" style={styles.icon} />
-        <View style={styles.pickerContainer}>
-          <Picker
-            selectedValue={maritalStatus}
-            style={styles.picker}
-            onValueChange={(itemValue, itemIndex) => setMaritalStatus(itemValue)}
-          >
-            <Picker.Item label="Select Marital Status" value="" />
-            <Picker.Item label="Single" value="Single" />
-            <Picker.Item label="Married" value="Married" />
-            <Picker.Item label="Divorced" value="Divorced" />
-            <Picker.Item label="Widowed" value="Widowed" />
-          </Picker>
-        </View>
+        <TextInput
+          autoCapitalize="none"
+          autoCorrect={false}
+          placeholder="Marital Status"
+          style={styles.inputControl}
+          value={maritalStatus}
+          onChangeText={setMaritalStatus}
+        />
       </View>
 
       <View style={styles.formAction}>
@@ -285,7 +272,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f9f9f9",
   },
   icon: {
-    marginRight: 10,
+    marginLeft: 10,
   },
   inputControl: {
     flex: 1,
@@ -295,16 +282,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "500",
     color: "#222",
-  },
-  pickerContainer: {
-    flex: 1,
-    height: 44,
-    justifyContent: 'center',
-    overflow: 'hidden',
-  },
-  picker: {
-    height: 44,
-    width: '100%',
   },
   formAction: {
     marginVertical: 24,
