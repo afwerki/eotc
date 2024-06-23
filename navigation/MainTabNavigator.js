@@ -1,14 +1,13 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Colors from '../constants/Colors';
-import { FontAwesome5, MaterialCommunityIcons, Ionicons, Octicons } from '@expo/vector-icons';
-import { Feather } from '@expo/vector-icons';
+import { FontAwesome5, MaterialCommunityIcons, Octicons, Feather } from '@expo/vector-icons';
 
 import HomeScreen from '../screens/HomeScreen';
 import NewsScreen from '../screens/NewsScreen';
 import MezmurScreen from '../screens/MezmurScreen';
 import ProjectsScreen from '../screens/ProjectsScreen';
-import ProfileScreen_simple from '../screens/ProfileScreen_simple';
+import ProfileStackNavigator from '../navigation/ProfileStackNavigator'; // Import the Profile Stack Navigator
 
 const Tab = createBottomTabNavigator();
 
@@ -66,11 +65,10 @@ const MainTabNavigator = () => {
       />
       <Tab.Screen
         name="Profile"
-        component={ProfileScreen_simple}
+        component={ProfileStackNavigator} // Use the Profile Stack Navigator
         options={{
           tabBarLabel: 'Setting',
-          tabBarIcon: ({ color, size }) => <Feather name="settings" size={24} color="black" />,
-          
+          tabBarIcon: ({ color, size }) => <Feather name="settings" size={24} color={color} />,
         }}
       />
     </Tab.Navigator>

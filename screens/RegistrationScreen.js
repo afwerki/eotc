@@ -7,11 +7,10 @@ import {
   TextInput,
   ScrollView,
   Alert,
-  Image
+  Image,
 } from "react-native";
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import Geolocation from 'react-native-geolocation-service';
 
 const RegistrationScreen = ({ navigation }) => {
   const [step, setStep] = useState(1);
@@ -23,31 +22,10 @@ const RegistrationScreen = ({ navigation }) => {
   const [password, setPassword] = useState('');
   const [gender, setGender] = useState('');
   const [maritalStatus, setMaritalStatus] = useState('');
-  const [location, setLocation] = useState(null);
-
-  const getLocation = () => {
-    Geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        setLocation({ latitude, longitude });
-        Alert.alert("Success", "Location retrieved successfully.");
-      },
-      (error) => {
-        console.error('Error getting location:', error);
-        Alert.alert("Error", "Failed to get location.");
-      },
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
-    );
-  };
 
   const handleRegister = async () => {
     if (!email || !password || !firstName || !lastName || !age || !username) {
       Alert.alert("Error", "Please fill out all fields.");
-      return;
-    }
-
-    if (!location) {
-      Alert.alert("Error", "Location is required. Please allow location access.");
       return;
     }
 
@@ -60,11 +38,10 @@ const RegistrationScreen = ({ navigation }) => {
       password,
       gender,
       marital_status: maritalStatus,
-      location
     };
 
     try {
-      const response = await fetch('https://5f2f-92-236-121-121.ngrok-free.app/register', {
+      const response = await fetch('https://2b72-92-236-121-121.ngrok-free.app/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -241,12 +218,6 @@ const RegistrationScreen = ({ navigation }) => {
         {step === 1 && loginAccess()}
         {step === 2 && first_last_names()}
         {step === 3 && age_maritalStatus()}
-        <TouchableOpacity
-          onPress={getLocation}
-          style={[styles.btn, { marginVertical: 20 }]}
-        >
-          <Text style={styles.btnText}>Get Location</Text>
-        </TouchableOpacity>
         <TouchableOpacity
           onPress={() => navigation.navigate('Login')}
           style={styles.footerLink}

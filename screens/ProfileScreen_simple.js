@@ -11,11 +11,16 @@ import {
 } from 'react-native';
 import FeatherIcon from 'react-native-vector-icons/Feather';
 
-const ProfileScreen_simple = () => {
+const ProfileScreen_simple = ({ navigation }) => {
   const [form, setForm] = useState({
     emailNotifications: true,
     pushNotifications: false,
   });
+
+  const handleLogout = () => {
+    // Add your logout logic here, e.g., clearing tokens or user data
+    navigation.navigate('Login');
+  };
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#f8f8f8' }}>
@@ -24,7 +29,7 @@ const ProfileScreen_simple = () => {
           <View style={styles.headerAction}>
             <TouchableOpacity
               onPress={() => {
-                // handle onPress
+                navigation.navigate('Home'); // Navigate to the home page
               }}>
               <FeatherIcon
                 color="#000"
@@ -38,7 +43,7 @@ const ProfileScreen_simple = () => {
           <View style={[styles.headerAction, { alignItems: 'flex-end' }]}>
             <TouchableOpacity
               onPress={() => {
-                // handle onPress
+                // Handle additional options
               }}>
               <FeatherIcon
                 color="#000"
@@ -55,7 +60,7 @@ const ProfileScreen_simple = () => {
             <View style={styles.sectionBody}>
               <TouchableOpacity
                 onPress={() => {
-                  // handle onPress
+                  // Handle profile press
                 }}
                 style={styles.profile}>
                 <Image
@@ -66,10 +71,10 @@ const ProfileScreen_simple = () => {
                   style={styles.profileAvatar} />
 
                 <View style={styles.profileBody}>
-                  <Text style={styles.profileName}>John Doe</Text>
+                  <Text style={styles.profileName}>Afwerki Ghirmay</Text>
 
                   <Text style={styles.profileHandle}>
-                    john.doe@mail.com
+                    afe.programmer@gmail.com
                   </Text>
                 </View>
 
@@ -82,20 +87,20 @@ const ProfileScreen_simple = () => {
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Preferences</Text>
+            <Text style={styles.sectionTitle}>Personal details</Text>
 
             <View style={styles.sectionBody}>
               <View style={[styles.rowWrapper, styles.rowFirst]}>
                 <TouchableOpacity
                   onPress={() => {
-                    // handle onPress
+                    // Handle first name press
                   }}
                   style={styles.row}>
-                  <Text style={styles.rowLabel}>Language</Text>
+                  <Text style={styles.rowLabel}>First name</Text>
 
                   <View style={styles.rowSpacer} />
 
-                  <Text style={styles.rowValue}>English</Text>
+                  <Text style={styles.rowValue}>Afe</Text>
 
                   <FeatherIcon
                     color="#bcbcbc"
@@ -107,49 +112,31 @@ const ProfileScreen_simple = () => {
               <View style={styles.rowWrapper}>
                 <TouchableOpacity
                   onPress={() => {
-                    // handle onPress
+                    // Handle last name press
                   }}
                   style={styles.row}>
-                  <Text style={styles.rowLabel}>Location</Text>
+                  <Text style={styles.rowLabel}>Last name</Text>
 
                   <View style={styles.rowSpacer} />
 
-                  <Text style={styles.rowValue}>Los Angeles, CA</Text>
-
-                  <FeatherIcon
-                    color="#bcbcbc"
-                    name="chevron-right"
-                    size={19} />
+                  <Text style={styles.rowValue}>Ghirmay</Text>
                 </TouchableOpacity>
               </View>
 
               <View style={styles.rowWrapper}>
                 <View style={styles.row}>
-                  <Text style={styles.rowLabel}>Email Notifications</Text>
+                  <Text style={styles.rowLabel}>Email</Text>
 
                   <View style={styles.rowSpacer} />
-
-                  <Switch
-                    onValueChange={emailNotifications =>
-                      setForm({ ...form, emailNotifications })
-                    }
-                    style={{ transform: [{ scaleX: 0.95 }, { scaleY: 0.95 }] }}
-                    value={form.emailNotifications} />
                 </View>
               </View>
 
               <View style={[styles.rowWrapper, styles.rowLast]}>
                 <View style={styles.row}>
-                  <Text style={styles.rowLabel}>Push Notifications</Text>
+                  <Text style={styles.rowLabel}>Phone number</Text>
 
                   <View style={styles.rowSpacer} />
 
-                  <Switch
-                    onValueChange={pushNotifications =>
-                      setForm({ ...form, pushNotifications })
-                    }
-                    style={{ transform: [{ scaleX: 0.95 }, { scaleY: 0.95 }] }}
-                    value={form.pushNotifications} />
                 </View>
               </View>
             </View>
@@ -162,10 +149,10 @@ const ProfileScreen_simple = () => {
               <View style={[styles.rowWrapper, styles.rowFirst]}>
                 <TouchableOpacity
                   onPress={() => {
-                    // handle onPress
+                    navigation.navigate('QuestionsUpload'); // Navigate to the QuestionsUpload screen
                   }}
                   style={styles.row}>
-                  <Text style={styles.rowLabel}>Contact Us</Text>
+                  <Text style={styles.rowLabel}>Quiz the community</Text>
 
                   <View style={styles.rowSpacer} />
 
@@ -179,10 +166,10 @@ const ProfileScreen_simple = () => {
               <View style={styles.rowWrapper}>
                 <TouchableOpacity
                   onPress={() => {
-                    // handle onPress
+                    navigation.navigate('Alert');
                   }}
                   style={styles.row}>
-                  <Text style={styles.rowLabel}>Report Bug</Text>
+                  <Text style={styles.rowLabel}>Add alert</Text>
 
                   <View style={styles.rowSpacer} />
 
@@ -196,10 +183,42 @@ const ProfileScreen_simple = () => {
               <View style={styles.rowWrapper}>
                 <TouchableOpacity
                   onPress={() => {
-                    // handle onPress
+                    navigation.navigate('Work');
                   }}
                   style={styles.row}>
-                  <Text style={styles.rowLabel}>Rate in App Store</Text>
+                  <Text style={styles.rowLabel}>Add work</Text>
+
+                  <View style={styles.rowSpacer} />
+
+                  <FeatherIcon
+                    color="#bcbcbc"
+                    name="chevron-right"
+                    size={19} />
+                </TouchableOpacity>
+              </View>
+              <View style={styles.rowWrapper}>
+                <TouchableOpacity
+                  onPress={() => {
+                    navigation.navigate('Learning');
+                  }}
+                  style={styles.row}>
+                  <Text style={styles.rowLabel}>Add important learning</Text>
+
+                  <View style={styles.rowSpacer} />
+
+                  <FeatherIcon
+                    color="#bcbcbc"
+                    name="chevron-right"
+                    size={19} />
+                </TouchableOpacity>
+              </View>
+              <View style={styles.rowWrapper}>
+                <TouchableOpacity
+                  onPress={() => {
+                    navigation.navigate('ProjectProposal');
+                  }}
+                  style={styles.row}>
+                  <Text style={styles.rowLabel}>Add project proposal</Text>
 
                   <View style={styles.rowSpacer} />
 
@@ -213,10 +232,10 @@ const ProfileScreen_simple = () => {
               <View style={[styles.rowWrapper, styles.rowLast]}>
                 <TouchableOpacity
                   onPress={() => {
-                    // handle onPress
+                    navigation.navigate('RentHouse');
                   }}
                   style={styles.row}>
-                  <Text style={styles.rowLabel}>Terms and Privacy</Text>
+                  <Text style={styles.rowLabel}>Add rent house</Text>
 
                   <View style={styles.rowSpacer} />
 
@@ -226,6 +245,7 @@ const ProfileScreen_simple = () => {
                     size={19} />
                 </TouchableOpacity>
               </View>
+              
             </View>
           </View>
 
@@ -239,9 +259,7 @@ const ProfileScreen_simple = () => {
                   { alignItems: 'center' },
                 ]}>
                 <TouchableOpacity
-                  onPress={() => {
-                    // handle onPress
-                  }}
+                  onPress={handleLogout}
                   style={styles.row}>
                   <Text style={[styles.rowLabel, styles.rowLabelLogout]}>
                     Log Out
