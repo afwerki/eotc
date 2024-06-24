@@ -151,6 +151,7 @@ const ProfileScreen_simple = ({ navigation }) => {
                   onPress={() => {
                     navigation.navigate('QuestionsUpload'); // Navigate to the QuestionsUpload screen
                   }}
+
                   style={styles.row}>
                   <Text style={styles.rowLabel}>Quiz the community</Text>
 
@@ -199,7 +200,7 @@ const ProfileScreen_simple = ({ navigation }) => {
               <View style={styles.rowWrapper}>
                 <TouchableOpacity
                   onPress={() => {
-                    navigation.navigate('Learning');
+                    navigation.navigate('learning');
                   }}
                   style={styles.row}>
                   <Text style={styles.rowLabel}>Add important learning</Text>
@@ -269,7 +270,7 @@ const ProfileScreen_simple = ({ navigation }) => {
             </View>
           </View>
 
-          <Text style={styles.contentFooter}>App Version 2.24 #50491</Text>
+          <Text style={styles.contentFooter}>If you have any questions about this app please get in touch with me: Afe.programmer@gmail.com</Text>
         </ScrollView>
       </View>
     </SafeAreaView>

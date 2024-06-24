@@ -34,7 +34,7 @@ const ProfileStackNavigator = () => {
         options={{ title: 'learning' }}
       />
       <Stack.Screen
-        name="Project Proposal"
+        name="ProjectProposal"
         component={ProjectProposal}
         options={{ title: 'Project Proposal'}}
       />
@@ -44,10 +44,11 @@ const ProfileStackNavigator = () => {
         options={{ title: 'Work'}}
       />
       <Stack.Screen
-        name="Rent House"
+        name="RentHouse"
         component={RentHouse }
         options={{ title: 'Rent house'}}
       />
+
     </Stack.Navigator>
   );
 };
