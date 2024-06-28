@@ -40,6 +40,8 @@ const images = [
 const HomeScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedFeature, setSelectedFeature] = useState({ icon: "", name: "", content: "" });
+  const [menuVisible, setMenuVisible] = useState(false);
+  const [notificationsVisible, setNotificationsVisible] = useState(false);
   const carouselRef = useRef(null);
 
   const handleIconPress = (feature) => {
@@ -47,22 +49,27 @@ const HomeScreen = () => {
     setModalVisible(true);
   };
 
+  const handleOutsidePress = () => {
+    setNotificationsVisible(false);
+    setMenuVisible(false);
+  };
+
   return (
     <SafeAreaView style={styles.container}>
-        <View style={styles.header}>
-          <Image
-            source={require("../assets/eotc.jpeg")}
-            style={styles.logo}
-          />
-          <Text style={styles.headerTitle}>Ethiopian Orthodox Church</Text>
-          <View style={styles.headerIcons}>
+      <View style={styles.header}>
+        <Image source={require("../assets/eotc.jpeg")} style={styles.logo} />
+        <Text style={styles.headerTitle}>Ethiopian Orthodox Church</Text>
+        <View style={styles.headerIcons}>
+          <TouchableOpacity onPress={() => setNotificationsVisible(!notificationsVisible)}>
             <FeatherIcon name="bell" size={24} color="white" style={styles.bellIcon} />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => setMenuVisible(true)}>
             <FeatherIcon name="menu" size={24} color="white" />
-          </View>
+          </TouchableOpacity>
         </View>
+      </View>
 
       <ScrollView>
-
         <View style={styles.categoriesContainer}>
           {categories.map((category, index) => (
             <TouchableOpacity key={index} style={styles.categoryCard} onPress={() => handleIconPress(category)}>
@@ -98,6 +105,41 @@ const HomeScreen = () => {
           </View>
         </View>
       </Modal>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={menuVisible}
+        onRequestClose={handleOutsidePress}
+      >
+        <TouchableOpacity style={styles.menuOverlay} activeOpacity={1} onPress={handleOutsidePress}>
+          <View style={styles.menuContent}>
+            <Text style={styles.menuTitle}>Menu</Text>
+            {categories.map((category, index) => (
+              <Text key={index} style={styles.menuItem}>{category.icon} {category.name}</Text>
+            ))}
+            <Pressable style={[styles.button, styles.buttonClose]} onPress={() => setMenuVisible(false)}>
+              <Text style={styles.textStyle}>Close</Text>
+            </Pressable>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={notificationsVisible}
+        onRequestClose={handleOutsidePress}
+      >
+        <TouchableOpacity style={styles.notificationOverlay} activeOpacity={1} onPress={handleOutsidePress}>
+          <View style={styles.notificationContent}>
+            <Text style={styles.notificationTitle}>Notifications</Text>
+            <Text style={styles.notificationItem}>Notification 1</Text>
+            <Text style={styles.notificationItem}>Notification 2</Text>
+            <Text style={styles.notificationItem}>Notification 3</Text>
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -112,7 +154,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     padding: 15,
-    backgroundColor: "#5D3FD3", // Changed color to a deep purple
+    backgroundColor: "#5D3FD3",
     borderBottomWidth: 1,
     borderBottomColor: "#ddd",
   },
@@ -124,13 +166,67 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "white", // Changed text color to white
+    color: "white",
   },
   headerIcons: {
     flexDirection: "row",
   },
   bellIcon: {
     marginRight: 15,
+  },
+  notificationsDropdown: {
+    backgroundColor: "#fff",
+    padding: 10,
+    borderRadius: 10,
+    position: "absolute",
+    top: 60,
+    right: 20,
+    zIndex: 1,
+  },
+  notificationOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  notificationContent: {
+    flex: 1,
+    backgroundColor: "#fff",
+    marginTop: 50,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+  },
+  notificationTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 20,
+  },
+  notificationItem: {
+    fontSize: 16,
+    paddingVertical: 10,
+  },
+  menuOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  menuContent: {
+    flex: 1,
+    backgroundColor: "#fff",
+    marginTop: 50,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+    alignItems: "center",
+  },
+  menuTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 20,
+  },
+  menuItem: {
+    fontSize: 18,
+    paddingVertical: 10,
   },
   categoriesContainer: {
     flexDirection: "row",
@@ -165,35 +261,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#333",
     textAlign: "center",
-  },
-  imageSlider: {
-    height: 200,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  carouselItem: {
-    position: "relative",
-  },
-  carouselImage: {
-    width: Dimensions.get('window').width,
-    height: 200,
-  },
-  carouselOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 50,
-    backgroundColor: "rgba(0, 0, 0, 0.3)",
-    justifyContent: "center",
-    alignItems: "center",
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 10,
-  },
-  carouselText: {
-    color: "white",
-    fontSize: 22,
-    fontWeight: "bold",
   },
   newsContainer: {
     padding: 10,

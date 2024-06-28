@@ -1,8 +1,28 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Image, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, Button, StyleSheet, Image, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const QuestionsUploadScreen = () => {
   const [questions, setQuestions] = useState([{ questionText: '', answers: ['', '', '', ''], correctAnswerIndex: null }]);
+  const [userId, setUserId] = useState(null);
+  const [username, setUsername] = useState('');
+
+  useEffect(() => {
+    const getUserData = async () => {
+      try {
+        const id = await AsyncStorage.getItem('userId');
+        const name = await AsyncStorage.getItem('username');
+        console.log('Retrieved userId:', id); // Debug log
+        console.log('Retrieved username:', name); // Debug log
+        setUserId(id);
+        setUsername(name);
+      } catch (error) {
+        console.error('Error fetching user data from AsyncStorage:', error);
+      }
+    };
+
+    getUserData();
+  }, []);
 
   const handleAddQuestion = () => {
     setQuestions([...questions, { questionText: '', answers: ['', '', '', ''], correctAnswerIndex: null }]);
@@ -27,14 +47,40 @@ const QuestionsUploadScreen = () => {
   };
 
   const handleSubmit = () => {
-    // Handle submitting the questions
-    console.log('Questions:', questions);
+    if (!userId || !username) {
+      Alert.alert('Error', 'User data not available.');
+      return;
+    }
+
+    const payload = {
+      questions,
+      userId,
+      username,
+      timestamp: new Date().toISOString()
+    };
+
+    fetch('https://fff3-92-236-121-121.ngrok-free.app/api/questions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log('Success:', data);
+      Alert.alert('Success', 'Questions uploaded successfully!');
+    })
+    .catch((error) => {
+      console.error('Error:', error);
+      Alert.alert('Error', 'Error uploading questions.');
+    });
   };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Image
-        source={{ uri: 'https://www.publicdomainpictures.net/pictures/30000/nahled/plain-christian-cross.jpg' }} // URL of a cross image
+        source={{ uri: 'https://www.publicdomainpictures.net/pictures/30000/nahled/plain-christian-cross.jpg' }}
         style={styles.crossImage}
       />
       <Text style={styles.title}>Upload Questions</Text>

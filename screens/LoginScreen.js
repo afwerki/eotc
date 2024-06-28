@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Image, TouchableOpacity, Dimensions, Alert } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
-import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const LoginScreen = ({ navigation }) => {
   const [username, setUsername] = useState('');
@@ -16,7 +16,7 @@ const LoginScreen = ({ navigation }) => {
     }
 
     try {
-      const response = await fetch('https://56cf-92-236-121-121.ngrok-free.app/login', {
+      const response = await fetch('https://fff3-92-236-121-121.ngrok-free.app/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -27,8 +27,12 @@ const LoginScreen = ({ navigation }) => {
       const result = await response.json();
 
       if (response.status === 200) {
+        await AsyncStorage.setItem('userId', result.userId.toString());
+        await AsyncStorage.setItem('username', result.username);
+        console.log('Stored userId:', result.userId); // Debug log
+        console.log('Stored username:', result.username); // Debug log
         Alert.alert("Success", "Login successful!");
-        navigation.replace('Main'); // Navigate to the main screen
+        navigation.replace('QuestionsUpload'); // Navigate to QuestionsUpload screen
       } else {
         Alert.alert("Error", result.message || "Login failed.");
       }
@@ -62,7 +66,6 @@ const LoginScreen = ({ navigation }) => {
 
         <TextInput
           style={styles.input}
-
           autoCapitalize="none"
           autoCorrect={false}
           placeholder="Username"
