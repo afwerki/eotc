@@ -7,7 +7,7 @@ import HomeScreen from '../screens/HomeScreen';
 import NewsScreen from '../screens/NewsScreen';
 import MezmurScreen from '../screens/MezmurScreen';
 import ProjectsScreen from '../screens/ProjectsScreen';
-import ProfileStackNavigator from '../navigation/ProfileStackNavigator'; // Import the Profile Stack Navigator
+import ProfileStackNavigator from './ProfileStackNavigator'; // Import the Profile Stack Navigator
 
 const Tab = createBottomTabNavigator();
 

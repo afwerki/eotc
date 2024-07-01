@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Image, TouchableOpacity, Dimensions, Alert } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity, Dimensions, Alert } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -16,7 +16,7 @@ const LoginScreen = ({ navigation }) => {
     }
 
     try {
-      const response = await fetch('https://fff3-92-236-121-121.ngrok-free.app/login', {
+      const response = await fetch('https://1b8f-92-236-121-121.ngrok-free.app/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -31,8 +31,7 @@ const LoginScreen = ({ navigation }) => {
         await AsyncStorage.setItem('username', result.username);
         console.log('Stored userId:', result.userId); // Debug log
         console.log('Stored username:', result.username); // Debug log
-        Alert.alert("Success", "Login successful!");
-        navigation.replace('QuestionsUpload'); // Navigate to QuestionsUpload screen
+        Alert.alert("Success", "Login successful!", [{ text: "OK", onPress: () => navigation.replace('Main') }]); // Navigate to MainTabNavigator
       } else {
         Alert.alert("Error", result.message || "Login failed.");
       }
@@ -60,10 +59,6 @@ const LoginScreen = ({ navigation }) => {
 
       <View style={styles.content}>
         <Text style={styles.welcomeText}>Welcome back</Text>
-        <View style={styles.imagePlaceholder}>
-          {/*<Image source = {require("../assets/eotc.jpeg")}/>*/}
-        </View>
-
         <TextInput
           style={styles.input}
           autoCapitalize="none"
@@ -73,7 +68,6 @@ const LoginScreen = ({ navigation }) => {
           value={username}
           onChangeText={setUsername}
         />
-
         <TextInput
           style={styles.input}
           placeholder="Password"
@@ -82,7 +76,7 @@ const LoginScreen = ({ navigation }) => {
           value={password}
           onChangeText={setPassword}
         />
-        <TouchableOpacity onPress={() => navigation.navigate('forgotPassword')}>
+        <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
           <Text style={styles.forgotPassword}>Forgot password</Text>
         </TouchableOpacity>
 
@@ -123,13 +117,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 20,
     color: '#333',
-  },
-  imagePlaceholder: {
-    width: 100,
-    height: 100,
-    backgroundColor: '#e0e0e0',
-    borderRadius: 50,
-    marginBottom: 20,
   },
   forgotPassword: {
     color: '#82d7f7',

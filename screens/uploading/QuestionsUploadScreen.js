@@ -59,7 +59,7 @@ const QuestionsUploadScreen = () => {
       timestamp: new Date().toISOString()
     };
 
-    fetch('https://fff3-92-236-121-121.ngrok-free.app/api/questions', {
+    fetch('https://1b8f-92-236-121-121.ngrok-free.app/api/questions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
