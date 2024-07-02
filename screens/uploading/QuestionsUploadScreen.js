@@ -1,28 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Image, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const QuestionsUploadScreen = () => {
   const [questions, setQuestions] = useState([{ questionText: '', answers: ['', '', '', ''], correctAnswerIndex: null }]);
-  const [userId, setUserId] = useState(null);
-  const [username, setUsername] = useState('');
-
-  useEffect(() => {
-    const getUserData = async () => {
-      try {
-        const id = await AsyncStorage.getItem('userId');
-        const name = await AsyncStorage.getItem('username');
-        console.log('Retrieved userId:', id); // Debug log
-        console.log('Retrieved username:', name); // Debug log
-        setUserId(id);
-        setUsername(name);
-      } catch (error) {
-        console.error('Error fetching user data from AsyncStorage:', error);
-      }
-    };
-
-    getUserData();
-  }, []);
 
   const handleAddQuestion = () => {
     setQuestions([...questions, { questionText: '', answers: ['', '', '', ''], correctAnswerIndex: null }]);
@@ -46,35 +27,35 @@ const QuestionsUploadScreen = () => {
     setQuestions(newQuestions);
   };
 
-  const handleSubmit = () => {
-    if (!userId || !username) {
-      Alert.alert('Error', 'User data not available.');
-      return;
-    }
+  const handleSubmit = async () => {
+    try {
+      const userId = await AsyncStorage.getItem('userId');
+      const username = await AsyncStorage.getItem('username');
 
-    const payload = {
-      questions,
-      userId,
-      username,
-      timestamp: new Date().toISOString()
-    };
+      if (!userId || !username) {
+        Alert.alert('Error', 'User data not available.');
+        return;
+      }
 
-    fetch('https://1b8f-92-236-121-121.ngrok-free.app/api/questions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    })
-    .then(response => response.json())
-    .then(data => {
-      console.log('Success:', data);
-      Alert.alert('Success', 'Questions uploaded successfully!');
-    })
-    .catch((error) => {
+      const response = await fetch('https://c8df-92-236-121-121.ngrok-free.app/api/add-question', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ questions, userId, username }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        Alert.alert('Success', 'Questions uploaded successfully!');
+      } else {
+        Alert.alert('Error', result.message || 'Error uploading questions.');
+      }
+    } catch (error) {
       console.error('Error:', error);
       Alert.alert('Error', 'Error uploading questions.');
-    });
+    }
   };
 
   return (
