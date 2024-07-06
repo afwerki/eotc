@@ -37,12 +37,24 @@ const QuestionsUploadScreen = () => {
         return;
       }
 
-      const response = await fetch('https://c8df-92-236-121-121.ngrok-free.app/api/add-question', {
+      const payload = {
+        questions: questions.map((question) => ({
+          questionText: question.questionText,
+          answers: question.answers,
+          correctAnswerIndex: question.correctAnswerIndex
+        })),
+        userId,
+        username
+      };
+
+      console.log('Submitting payload:', payload);
+
+      const response = await fetch('https://2644-92-236-121-121.ngrok-free.app/api/add-question', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ questions, userId, username }),
+        body: JSON.stringify(payload),
       });
 
       const result = await response.json();

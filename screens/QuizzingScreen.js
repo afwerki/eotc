@@ -3,12 +3,14 @@ import { View, Text, TouchableOpacity, StyleSheet, FlatList, ActivityIndicator, 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const QuizzingScreen = () => {
-  const [questions, setQuestions] = useState([]);
+  const [questionSets, setQuestionSets] = useState([]);
+  const [selectedSetIndex, setSelectedSetIndex] = useState(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [score, setScore] = useState(0);
-  const [selectedAnswerId, setSelectedAnswerId] = useState(null);
+  const [selectedAnswers, setSelectedAnswers] = useState({});
   const [showAnswer, setShowAnswer] = useState(false);
+  const [completed, setCompleted] = useState(false);
 
   useEffect(() => {
     const fetchQuestions = async () => {
@@ -17,13 +19,15 @@ const QuizzingScreen = () => {
         if (!userId) {
           throw new Error('User ID not found');
         }
-        const response = await fetch(`https://c8df-92-236-121-121.ngrok-free.app/api/questions?userId=${userId}`);
-        const data = await response.json();
+        const response = await fetch(`https://2644-92-236-121-121.ngrok-free.app/api/questions?userId=${userId}`);
+        const responseText = await response.text();
+        console.log('Raw response:', responseText);  // Log raw response
+        const data = JSON.parse(responseText);  // Parse JSON from the raw response
         if (!response.ok) {
           throw new Error(data.message || 'Failed to load questions');
         }
-        console.log('Fetched questions:', data);
-        setQuestions(data);
+        console.log('Fetched question sets:', data);
+        setQuestionSets(data);
         setLoading(false);
       } catch (error) {
         console.error('Error:', error);
@@ -35,14 +39,25 @@ const QuizzingScreen = () => {
     fetchQuestions();
   }, []);
 
+  const handleSetSelect = (index) => {
+    setSelectedSetIndex(index);
+    setCurrentQuestionIndex(0);
+    setScore(0);
+    setSelectedAnswers({});
+    setShowAnswer(false);
+    setCompleted(false);
+  };
+
   const handleAnswerPress = (answerId) => {
-    setSelectedAnswerId(answerId);
+    setSelectedAnswers((prev) => ({
+      ...prev,
+      [currentQuestionIndex]: answerId,
+    }));
     setShowAnswer(true);
-    const correctAnswerId = questions[currentQuestionIndex].correct_answer_id;
+    const correctAnswerId = questionSets[selectedSetIndex].questions[currentQuestionIndex].correct_answer_id;
     console.log('Selected answer ID:', answerId);
     console.log('Correct answer ID:', correctAnswerId);
 
-    // Ensure both IDs are treated as numbers for comparison
     if (Number(correctAnswerId) === Number(answerId)) {
       setScore(score + 1);
       Alert.alert('Correct!', 'You got it right!');
@@ -52,9 +67,52 @@ const QuizzingScreen = () => {
   };
 
   const handleNextQuestion = () => {
-    setSelectedAnswerId(null);
     setShowAnswer(false);
-    setCurrentQuestionIndex((prev) => Math.min(prev + 1, questions.length - 1));
+    setCurrentQuestionIndex((prev) => {
+      if (prev + 1 < questionSets[selectedSetIndex].questions.length) {
+        return prev + 1;
+      } else {
+        setCompleted(true);
+        return prev;
+      }
+    });
+  };
+
+  const handleSubmitAnswers = async () => {
+    const userId = await AsyncStorage.getItem('userId');
+    const answers = questionSets[selectedSetIndex].questions.map((question, index) => ({
+      questionId: question.question_id,
+      answerId: selectedAnswers[index],
+      isCorrect: Number(question.correct_answer_id) === Number(selectedAnswers[index]),
+    }));
+
+    // Check for any null answerId before sending to the backend
+    const hasNullAnswerId = answers.some(answer => answer.answerId === undefined || answer.answerId === null);
+    if (hasNullAnswerId) {
+      Alert.alert('Error', 'Some answers are missing. Please answer all questions before submitting.');
+      return;
+    }
+
+    try {
+      const response = await fetch('https://fc55-92-236-121-121.ngrok-free.app/api/submit-answers', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId, answers }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        Alert.alert('Success', 'Answers submitted successfully!');
+      } else {
+        Alert.alert('Error', result.message || 'Error submitting answers.');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      Alert.alert('Error', 'Error submitting answers.');
+    }
   };
 
   if (loading) {
@@ -65,7 +123,7 @@ const QuizzingScreen = () => {
     );
   }
 
-  if (questions.length === 0) {
+  if (questionSets.length === 0) {
     return (
       <View style={styles.container}>
         <Text style={styles.noQuestionsText}>No questions available.</Text>
@@ -73,36 +131,81 @@ const QuizzingScreen = () => {
     );
   }
 
-  const currentQuestion = questions[currentQuestionIndex];
+  if (selectedSetIndex === null) {
+    return (
+      <View style={styles.container}>
+        <FlatList
+          data={questionSets}
+          renderItem={({ item, index }) => (
+            <TouchableOpacity
+              style={styles.card}
+              onPress={() => handleSetSelect(index)}
+            >
+              <Text style={styles.cardTitle}>Set {index + 1}</Text>
+              <Text style={styles.cardText}>Uploaded by: {item.username}</Text>
+              <Text style={styles.cardText}>Upload time: {new Date(item.upload_time).toLocaleString()}</Text>
+            </TouchableOpacity>
+          )}
+          keyExtractor={(item) => item.set_id.toString()}
+        />
+      </View>
+    );
+  }
+
+  const currentQuestion = questionSets[selectedSetIndex].questions[currentQuestionIndex];
 
   return (
     <View style={styles.container}>
-      <Text style={styles.questionText}>{currentQuestion.question_text}</Text>
-      <FlatList
-        data={currentQuestion.answers}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={[
-              styles.answerButton,
-              showAnswer && item.id === currentQuestion.correct_answer_id ? styles.correctAnswer : {},
-              showAnswer && item.id !== currentQuestion.correct_answer_id ? styles.incorrectAnswer : {},
-            ]}
-            onPress={() => handleAnswerPress(item.id)}
-            disabled={showAnswer}
-          >
-            <Text style={styles.answerText}>{item.answer_text}</Text>
+      {completed ? (
+        <View style={styles.container}>
+          <Text style={styles.summaryText}>You have completed the quiz!</Text>
+          <Text style={styles.summaryText}>Score: {score} / {questionSets[selectedSetIndex].questions.length}</Text>
+          <TouchableOpacity style={styles.navButton} onPress={handleSubmitAnswers}>
+            <Text style={styles.navButtonText}>Submit Answers</Text>
           </TouchableOpacity>
-        )}
-        keyExtractor={(item) => item.id.toString()}
-      />
-      {showAnswer && (
-        <View style={styles.navigationButtons}>
-          <TouchableOpacity style={styles.navButton} onPress={handleNextQuestion}>
-            <Text style={styles.navButtonText}>Next Question</Text>
+          <TouchableOpacity style={styles.navButton} onPress={() => setSelectedSetIndex(null)}>
+            <Text style={styles.navButtonText}>Back to Sets</Text>
           </TouchableOpacity>
         </View>
+      ) : (
+        <>
+          <Text style={styles.questionText}>{currentQuestion.question_text}</Text>
+          <FlatList
+            data={currentQuestion.answers}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={[
+                  styles.answerButton,
+                  showAnswer && item.id === currentQuestion.correct_answer_id ? styles.correctAnswer : {},
+                  showAnswer && item.id !== currentQuestion.correct_answer_id ? styles.incorrectAnswer : {},
+                ]}
+                onPress={() => handleAnswerPress(item.id)}
+                disabled={showAnswer}
+              >
+                <Text style={styles.answerText}>{item.answer_text}</Text>
+              </TouchableOpacity>
+            )}
+            keyExtractor={(item) => item.id.toString()}
+          />
+          {showAnswer && (
+            <View style={styles.navigationButtons}>
+              {currentQuestionIndex + 1 < questionSets[selectedSetIndex].questions.length ? (
+                <TouchableOpacity style={styles.navButton} onPress={handleNextQuestion}>
+                  <Text style={styles.navButtonText}>Next Question</Text>
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity style={styles.navButton} onPress={() => setCompleted(true)}>
+                  <Text style={styles.navButtonText}>Finish Quiz</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          )}
+        </>
       )}
       <Text style={styles.scoreText}>Score: {score}</Text>
+      <TouchableOpacity style={styles.navButton} onPress={() => setSelectedSetIndex(null)}>
+        <Text style={styles.navButtonText}>Back to Sets</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -148,6 +251,7 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 10,
     alignItems: 'center',
+    marginVertical: 10,
   },
   navButtonText: {
     color: '#fff',
@@ -162,6 +266,31 @@ const styles = StyleSheet.create({
   noQuestionsText: {
     fontSize: 18,
     color: '#333',
+  },
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 20,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  cardText: {
+    fontSize: 16,
+    marginBottom: 5,
+  },
+  summaryText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    textAlign: 'center',
   },
 });
 
