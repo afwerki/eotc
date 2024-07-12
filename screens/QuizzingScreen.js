@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, FlatList, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, FlatList, ActivityIndicator, Alert, SectionList } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const QuizzingScreen = () => {
@@ -19,7 +19,7 @@ const QuizzingScreen = () => {
         if (!userId) {
           throw new Error('User ID not found');
         }
-        const response = await fetch(`https://2644-92-236-121-121.ngrok-free.app/api/questions?userId=${userId}`);
+        const response = await fetch(`https://12a1-92-236-121-121.ngrok-free.app/api/questions`);
         const responseText = await response.text();
         console.log('Raw response:', responseText);  // Log raw response
         const data = JSON.parse(responseText);  // Parse JSON from the raw response
@@ -27,7 +27,30 @@ const QuizzingScreen = () => {
           throw new Error(data.message || 'Failed to load questions');
         }
         console.log('Fetched question sets:', data);
-        setQuestionSets(data);
+
+        if (!Array.isArray(data)) {
+          throw new Error('Unexpected response format');
+        }
+
+        // Sort data by upload_time in descending order
+        const sortedData = data.sort((a, b) => new Date(b.upload_time) - new Date(a.upload_time));
+        // Group data by username
+        const groupedData = sortedData.reduce((acc, item) => {
+          const { username } = item;
+          if (!acc[username]) {
+            acc[username] = [];
+          }
+          acc[username].push(item);
+          return acc;
+        }, {});
+
+        // Convert grouped data to section list format
+        const sections = Object.keys(groupedData).map((username) => ({
+          title: username,
+          data: groupedData[username],
+        }));
+
+        setQuestionSets(sections);
         setLoading(false);
       } catch (error) {
         console.error('Error:', error);
@@ -39,8 +62,8 @@ const QuizzingScreen = () => {
     fetchQuestions();
   }, []);
 
-  const handleSetSelect = (index) => {
-    setSelectedSetIndex(index);
+  const handleSetSelect = (setIndex, sectionIndex) => {
+    setSelectedSetIndex({ setIndex, sectionIndex });
     setCurrentQuestionIndex(0);
     setScore(0);
     setSelectedAnswers({});
@@ -54,7 +77,9 @@ const QuizzingScreen = () => {
       [currentQuestionIndex]: answerId,
     }));
     setShowAnswer(true);
-    const correctAnswerId = questionSets[selectedSetIndex].questions[currentQuestionIndex].correct_answer_id;
+
+    const { questions } = questionSets[selectedSetIndex.sectionIndex].data[selectedSetIndex.setIndex];
+    const correctAnswerId = questions[currentQuestionIndex]?.correct_answer_id;
     console.log('Selected answer ID:', answerId);
     console.log('Correct answer ID:', correctAnswerId);
 
@@ -69,7 +94,8 @@ const QuizzingScreen = () => {
   const handleNextQuestion = () => {
     setShowAnswer(false);
     setCurrentQuestionIndex((prev) => {
-      if (prev + 1 < questionSets[selectedSetIndex].questions.length) {
+      const { questions } = questionSets[selectedSetIndex.sectionIndex].data[selectedSetIndex.setIndex];
+      if (prev + 1 < questions.length) {
         return prev + 1;
       } else {
         setCompleted(true);
@@ -80,7 +106,8 @@ const QuizzingScreen = () => {
 
   const handleSubmitAnswers = async () => {
     const userId = await AsyncStorage.getItem('userId');
-    const answers = questionSets[selectedSetIndex].questions.map((question, index) => ({
+    const { questions } = questionSets[selectedSetIndex.sectionIndex].data[selectedSetIndex.setIndex];
+    const answers = questions.map((question, index) => ({
       questionId: question.question_id,
       answerId: selectedAnswers[index],
       isCorrect: Number(question.correct_answer_id) === Number(selectedAnswers[index]),
@@ -94,7 +121,7 @@ const QuizzingScreen = () => {
     }
 
     try {
-      const response = await fetch('https://fc55-92-236-121-121.ngrok-free.app/api/submit-answers', {
+      const response = await fetch('https://86b8-92-236-121-121.ngrok-free.app/api/submit-answers', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -123,7 +150,7 @@ const QuizzingScreen = () => {
     );
   }
 
-  if (questionSets.length === 0) {
+  if (!questionSets || questionSets.length === 0) {
     return (
       <View style={styles.container}>
         <Text style={styles.noQuestionsText}>No questions available.</Text>
@@ -134,32 +161,48 @@ const QuizzingScreen = () => {
   if (selectedSetIndex === null) {
     return (
       <View style={styles.container}>
-        <FlatList
-          data={questionSets}
-          renderItem={({ item, index }) => (
+        <SectionList
+          sections={questionSets}
+          renderItem={({ item, index, section }) => (
             <TouchableOpacity
               style={styles.card}
-              onPress={() => handleSetSelect(index)}
+              onPress={() => handleSetSelect(index, questionSets.indexOf(section))}
+              key={`${item.set_id}-${index}`}  // Ensure unique key
             >
               <Text style={styles.cardTitle}>Set {index + 1}</Text>
               <Text style={styles.cardText}>Uploaded by: {item.username}</Text>
               <Text style={styles.cardText}>Upload time: {new Date(item.upload_time).toLocaleString()}</Text>
+              <Text style={styles.cardText}>Number of questions: {item.questions.length}</Text>
             </TouchableOpacity>
           )}
-          keyExtractor={(item) => item.set_id.toString()}
+          renderSectionHeader={({ section: { title } }) => (
+            <Text style={styles.sectionHeader}>{title}</Text>
+          )}
+          keyExtractor={(item, index) => `${item.set_id}-${index}`}
         />
       </View>
     );
   }
 
-  const currentQuestion = questionSets[selectedSetIndex].questions[currentQuestionIndex];
+  const { questions } = questionSets[selectedSetIndex.sectionIndex].data[selectedSetIndex.setIndex];
+  if (!questions || questions.length === 0) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.noQuestionsText}>No questions available in this set.</Text>
+        <TouchableOpacity style={styles.navButton} onPress={() => setSelectedSetIndex(null)}>
+          <Text style={styles.navButtonText}>Back to Sets</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+  const currentQuestion = questions[currentQuestionIndex];
 
   return (
     <View style={styles.container}>
       {completed ? (
         <View style={styles.container}>
           <Text style={styles.summaryText}>You have completed the quiz!</Text>
-          <Text style={styles.summaryText}>Score: {score} / {questionSets[selectedSetIndex].questions.length}</Text>
+          <Text style={styles.summaryText}>Score: {score} / {questions.length}</Text>
           <TouchableOpacity style={styles.navButton} onPress={handleSubmitAnswers}>
             <Text style={styles.navButtonText}>Submit Answers</Text>
           </TouchableOpacity>
@@ -169,27 +212,28 @@ const QuizzingScreen = () => {
         </View>
       ) : (
         <>
-          <Text style={styles.questionText}>{currentQuestion.question_text}</Text>
+          <Text style={styles.questionText}>{currentQuestion?.question_text}</Text>
           <FlatList
-            data={currentQuestion.answers}
+            data={currentQuestion?.answers || []}
             renderItem={({ item }) => (
               <TouchableOpacity
                 style={[
                   styles.answerButton,
-                  showAnswer && item.id === currentQuestion.correct_answer_id ? styles.correctAnswer : {},
-                  showAnswer && item.id !== currentQuestion.correct_answer_id ? styles.incorrectAnswer : {},
+                  showAnswer && item.answer_id === currentQuestion?.correct_answer_id ? styles.correctAnswer : {},
+                  showAnswer && item.answer_id !== currentQuestion?.correct_answer_id ? styles.incorrectAnswer : {},
                 ]}
-                onPress={() => handleAnswerPress(item.id)}
+                onPress={() => handleAnswerPress(item.answer_id)}
                 disabled={showAnswer}
+                key={`${item.answer_id}`}  // Ensure unique key
               >
                 <Text style={styles.answerText}>{item.answer_text}</Text>
               </TouchableOpacity>
             )}
-            keyExtractor={(item) => item.id.toString()}
+            keyExtractor={(item) => `${item.answer_id}`}  // Ensure unique key
           />
           {showAnswer && (
             <View style={styles.navigationButtons}>
-              {currentQuestionIndex + 1 < questionSets[selectedSetIndex].questions.length ? (
+              {currentQuestionIndex + 1 < questions.length ? (
                 <TouchableOpacity style={styles.navButton} onPress={handleNextQuestion}>
                   <Text style={styles.navButtonText}>Next Question</Text>
                 </TouchableOpacity>
@@ -291,6 +335,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 20,
     textAlign: 'center',
+  },
+  sectionHeader: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    backgroundColor: '#f5f5f5',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
   },
 });
 

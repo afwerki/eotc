@@ -8,6 +8,7 @@ import ProjectProposal from '../screens/uploading/ProjectProposal';
 import Work from '../screens/uploading/Work';
 import RentHouse from '../screens/uploading/RentHouse';
 import QuizzingScreen from '../screens/QuizzingScreen';
+import TopUsersScreen from '../screens/TopUsersScreen';
 
 const Stack = createStackNavigator();
 
@@ -21,7 +22,7 @@ const ProfileStackNavigator = () => {
       />
       <Stack.Screen
         name="QuestionsUpload"
-        component={QuizzingScreen}
+        component={TopUsersScreen}
         options={{ title: 'Upload Questions' }}
       />
       <Stack.Screen

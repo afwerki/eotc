@@ -16,7 +16,7 @@ const LoginScreen = ({ navigation }) => {
     }
 
     try {
-      const response = await fetch('https://2644-92-236-121-121.ngrok-free.app/login', {
+      const response = await fetch('https://86b8-92-236-121-121.ngrok-free.app/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
