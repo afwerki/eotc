@@ -1,0 +1,79 @@
+import React from 'react';
+import { StyleSheet, SafeAreaView, View, Text } from 'react-native';
+
+const items = [
+  {
+    label: 'App users',
+    value: '10000',
+  },
+  {
+    label: 'Male',
+    value: '243',
+  },
+  {
+    label: 'Female',
+    value: '3000',
+  },
+];
+
+export default function Example() {
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#f6f6f6' }}>
+      <View style={styles.container}>
+        <Text style={styles.title}>Your Stats</Text>
+
+        <View style={styles.stats}>
+          {items.map(({ label, value }, index) => (
+            <View
+              key={index}
+              style={[styles.statsItem, index === 0 && { borderLeftWidth: 0 }]}>
+              <Text style={styles.statsItemLabel}>{label}</Text>
+
+              <Text style={styles.statsItemValue}>{value}</Text>
+            </View>
+          ))}
+        </View>
+      </View>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 24,
+  },
+  title: {
+    fontSize: 32,
+    fontWeight: '700',
+    color: '#1d1d1d',
+    marginBottom: 12,
+  },
+  /** Stats */
+  stats: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  statsItem: {
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: 0,
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 6,
+    borderLeftWidth: 1,
+    borderColor: '#e1e1e1',
+  },
+  statsItemLabel: {
+    fontSize: 15,
+    fontWeight: '500',
+    color: '#000',
+    marginBottom: 4,
+  },
+  statsItemValue: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#000',
+  },
+});
