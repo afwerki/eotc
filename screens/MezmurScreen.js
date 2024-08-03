@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import FeatherIcon from 'react-native-vector-icons/Feather';
 import { Link } from 'expo-router';
+import TopNavScreen from "./TopNavScreen"; // Import the TopNavScreen component
 
 const MezmurScreen = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -29,31 +30,7 @@ const MezmurScreen = () => {
       tag: "የማሪያም መዝሙር",
       date: "Mar, 2023",
     },
-    {
-      img: "https://plus.unsplash.com/premium_photo-1677439907866-938da05a0ee0?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      title: "ሀኪም ሰብለ በእርግዝና ዙሪያ ለሴቶች ትምህርት መስጠት ትፈልጋለች።",
-      author: "አፍወርቅ",
-      authorImg: "https://media.istockphoto.com/id/157189484/photo/icon-madonna-with-child.webp?b=1&s=170667a&w=0&k=20&c=u90v28mLh8n2gW26vBHlpoMbRdxn8kk_TSTKToYslME=",
-      tag: "የማሪያም መዝሙር",
-      date: "Mar, 2023",
-    },
-    {
-      img: "https://plus.unsplash.com/premium_photo-1677439907866-938da05a0ee0?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      title: "ሀኪም ሰብለ በእርግዝና ዙሪያ ለሴቶች ትምህርት መስጠት ትፈልጋለች።",
-      author: "አፍወርቅ",
-      authorImg: "https://media.istockphoto.com/id/157189484/photo/icon-madonna-with-child.webp?b=1&s=170667a&w=0&k=20&c=u90v28mLh8n2gW26vBHlpoMbRdxn8kk_TSTKToYslME=",
-      tag: "የማሪያም መዝሙር",
-      date: "Mar, 2023",
-    },
-    {
-      img: "https://plus.unsplash.com/premium_photo-1677439907866-938da05a0ee0?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      title: "ሀኪም ሰብለ በእርግዝና ዙሪያ ለሴቶች ትምህርት መስጠት ትፈልጋለች።",
-      author: "አፍወርቅ",
-      authorImg: "https://media.istockphoto.com/id/157189484/photo/icon-madonna-with-child.webp?b=1&s=170667a&w=0&k=20&c=u90v28mLh8n2gW26vBHlpoMbRdxn8kk_TSTKToYslME=",
-      tag: "የማሪያም መዝሙር",
-      date: "Mar, 2023",
-    },
-    // ... other items
+    // Add more items here
   ];
 
   const filterItems = (searchTerm) => {
@@ -89,19 +66,11 @@ const MezmurScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Image
-            source={require("../assets/eotc.jpeg")}
-            style={styles.logo}
-          />
-          <Text style={styles.headerTitle}>Ethiopian Orthodox Church</Text>
-          <View style={styles.headerIcons}>
-            <FeatherIcon name="bell" size={24} color="black" style={styles.bellIcon} />
-            <FeatherIcon name="menu" size={24} color="black" />
-          </View>
-        </View>
+      <TopNavScreen 
+        onBellPress={() => console.log('Bell Pressed')} 
+        onMenuPress={() => console.log('Menu Pressed')} 
+      />
       <ScrollView>
-
         <View style={styles.main}>
           <View>
             <Link href={"/(modals)/Upload_mezmur"} style={{ textDecorationLine: 'underline' }}> Upload Mezmur</Link>
@@ -180,36 +149,11 @@ const MezmurScreen = () => {
     </SafeAreaView>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f0e8df',
-  },
-  logo:{
-    width:40,
-    height:40,
-    resizeMode:'contain',
-
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 15,
-    backgroundColor: '#f0e8df',
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  headerIcons: {
-    flexDirection: 'row',
-  },
-  bellIcon: {
-    marginRight: 15,
+    backgroundColor: '#e6f0fa',
   },
   main: {
     padding: 24,

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Modal, Button, ScrollView, SafeAreaView } from 'react-native';
+import TopNavScreen from "./TopNavScreen"; // Import the TopNavScreen component
 
 const ProjectsScreen = () => {
   const [items, setItems] = useState([]);
@@ -9,7 +10,7 @@ const ProjectsScreen = () => {
 
   useEffect(() => {
     // Fetch data from the API
-    fetch('https://91c5-92-236-121-121.ngrok-free.app/projects')
+    fetch('https://0d51-92-236-121-121.ngrok-free.app/projects')
       .then(response => response.json())
       .then(data => {
         setItems(data);
@@ -44,50 +45,60 @@ const ProjectsScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Projects</Text>
+    <SafeAreaView style={styles.safeArea}>
+      <TopNavScreen 
+        onBellPress={() => console.log('Bell Pressed')} 
+        onMenuPress={() => console.log('Menu Pressed')} 
+      />
+      <View style={styles.container}>
+        <Text style={styles.title}>Projects</Text>
 
-      {items.map(({ label, badget, description}, index) => {
-        const isActive = value === index;
-        return (
-          <TouchableOpacity
-            key={index}
-            onPress={() => {
-              setValue(index);
-              openModal(index);
-            }}>
-            <View style={[styles.radio, isActive && styles.radioActive]}>
-              <View style={styles.radioTop}>
-                <Text style={styles.radioLabel}>{label}</Text>
-                <Text style={styles.radioUsers}>Budget $ {badget}</Text>
+        {items.map(({ label, badget, description}, index) => {
+          const isActive = value === index;
+          return (
+            <TouchableOpacity
+              key={index}
+              onPress={() => {
+                setValue(index);
+                openModal(index);
+              }}>
+              <View style={[styles.radio, isActive && styles.radioActive]}>
+                <View style={styles.radioTop}>
+                  <Text style={styles.radioLabel}>{label}</Text>
+                  <Text style={styles.radioUsers}>Budget $ {badget}</Text>
+                </View>
+                <Text style={styles.radioDescription}>{trimDescription(description)}</Text>
               </View>
-              <Text style={styles.radioDescription}>{trimDescription(description)}</Text>
-            </View>
-          </TouchableOpacity>
-        );
-      })}
+            </TouchableOpacity>
+          );
+        })}
 
-      {/* Modal */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={closeModal}>
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>{selectedProject && selectedProject.label}</Text>
-            <ScrollView contentContainerStyle={styles.modalScrollView}>
-              <Text style={styles.modalDescription}>{formatDescription(selectedProject && selectedProject.description)}</Text>
-            </ScrollView>
-            <Button title="Close" onPress={closeModal} />
+        {/* Modal */}
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={closeModal}>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>{selectedProject && selectedProject.label}</Text>
+              <ScrollView contentContainerStyle={styles.modalScrollView}>
+                <Text style={styles.modalDescription}>{formatDescription(selectedProject && selectedProject.description)}</Text>
+              </ScrollView>
+              <Button title="Close" onPress={closeModal} />
+            </View>
           </View>
-        </View>
-      </Modal>
-    </View>
+        </Modal>
+      </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#e6f0fa",
+  },
   container: {
     flex: 1,
     padding: 24,
@@ -167,4 +178,3 @@ const styles = StyleSheet.create({
 });
 
 export default ProjectsScreen;
-

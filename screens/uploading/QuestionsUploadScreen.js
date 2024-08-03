@@ -49,7 +49,7 @@ const QuestionsUploadScreen = () => {
 
       console.log('Submitting payload:', payload);
 
-      const response = await fetch('https://217a-92-236-121-121.ngrok-free.app/api/add-question', {
+      const response = await fetch('https://0d51-92-236-121-121.ngrok-free.app/api/add-question', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

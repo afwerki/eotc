@@ -5,6 +5,7 @@ import { FontAwesome5, MaterialCommunityIcons, Octicons, Feather } from '@expo/v
 
 import HomeScreen from '../screens/HomeScreen';
 import NewsScreen from '../screens/NewsScreen';
+import BooksScreen from '../screens/BooksScreen';
 import MezmurScreen from '../screens/MezmurScreen';
 import ProjectsScreen from '../screens/ProjectsScreen';
 import ProfileStackNavigator from './ProfileStackNavigator'; // Import the Profile Stack Navigator
@@ -16,9 +17,7 @@ const MainTabNavigator = () => {
     <Tab.Navigator
       screenOptions={{
         tabBarActiveTintColor: Colors.primary,
-        tabBarLabelStyle: {
-          fontFamily: 'mon-sb',
-        },
+        
       }}
     >
       <Tab.Screen
@@ -32,7 +31,7 @@ const MainTabNavigator = () => {
       />
       <Tab.Screen
         name="Books"
-        component={NewsScreen} // Assuming NewsScreen is temporarily used for this example
+        component={BooksScreen} // Assuming NewsScreen is temporarily used for this example
         options={{
           tabBarLabel: 'Books',
           tabBarIcon: ({ color, size }) => <FontAwesome5 name="bible" color={color} size={size} />,
