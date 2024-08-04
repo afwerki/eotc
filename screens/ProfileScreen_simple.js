@@ -285,6 +285,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     flexShrink: 1,
     flexBasis: 0,
+    backgroundColor:'#e6f0fa',
   },
   /** Header */
   header: {

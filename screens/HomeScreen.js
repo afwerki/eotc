@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   ScrollView,
   Text,
-  Pressable,
   Modal,
   Dimensions,
   Animated,
@@ -17,14 +16,15 @@ import FeatherIcon from "react-native-vector-icons/Feather";
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import TopNavScreen from "./TopNavScreen";
+import Work from "./Work";
 
 const categories = [
-  { icon: "🏨", name: "ቤት ኪራይ" },
+  { icon: "🏨", name: "ስራ/ Work" },
+  { icon: "🏨", name: "ቤት ኪራይ/ Rent" },
   { icon: "🎵", name: "መዝሙር" },
   { icon: "📰", name: "የቤተክርስቲያን ዜናዎች" },
   { icon: "📚", name: "መፃህፍህት" },
   { icon: "📂", name: "Projects" },
-  { icon: "👤", name: "ሹፍርና" },
 ];
 
 const videos = [
@@ -32,7 +32,8 @@ const videos = [
   require('../assets/meskel.mp4'),
 ];
 
-const HomeScreen = () => {
+const HomeScreen = ({ navigation }) => {
+  const [activeScreen, setActiveScreen] = useState('home');
   const [modalVisible, setModalVisible] = useState(false);
   const [menuVisible, setMenuVisible] = useState(false);
   const [notificationsVisible, setNotificationsVisible] = useState(false);
@@ -42,11 +43,13 @@ const HomeScreen = () => {
   useEffect(() => {
     let position = 0;
     const interval = setInterval(() => {
-      position = (position + 1) % videos.length;
-      carouselRef.current.scrollTo({ x: position * Dimensions.get('window').width, animated: true });
+      if (carouselRef.current) {
+        position = (position + 1) % videos.length;
+        carouselRef.current.scrollTo({ x: position * Dimensions.get('window').width, animated: true });
+      }
     }, 12000);
     return () => clearInterval(interval);
-  }, []);
+  }, [carouselRef]);
 
   const handleOutsidePress = () => {
     setNotificationsVisible(false);
@@ -54,166 +57,138 @@ const HomeScreen = () => {
   };
 
   const handleIconPress = (category) => {
-    // Placeholder for category icon press handling
+    if (category.name === "ስራ/ Work") {
+      setActiveScreen('work');
+    }
+  };
+
+  const goBack = () => {
+    setActiveScreen('home');
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <TopNavScreen
-        onBellPress={() => setNotificationsVisible(!notificationsVisible)}
-        onMenuPress={() => setMenuVisible(true)}
-      />
+      {activeScreen === 'home' && (
+        <>
+          <TopNavScreen
+            onBellPress={() => setNotificationsVisible(!notificationsVisible)}
+            onMenuPress={() => setMenuVisible(true)}
+          />
 
-      <ScrollView>
-        <View style={styles.imageSliderContainer}>
-          <ScrollView
-            horizontal
-            pagingEnabled
-            showsHorizontalScrollIndicator={false}
-            ref={carouselRef}
-            onScroll={Animated.event(
-              [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-              { useNativeDriver: false }
-            )}
-          >
-            {videos.map((videoUri, index) => (
-              <Video
-                key={index}
-                source={typeof videoUri === 'string' ? { uri: videoUri } : videoUri}
-                style={styles.sliderImage}
-                resizeMode="cover"
-                isLooping
-                shouldPlay
-                isMuted={true}
-              />
-            ))}
-          </ScrollView>
-        </View>
+          <ScrollView>
+            <View style={styles.imageSliderContainer}>
+              <ScrollView
+                horizontal
+                pagingEnabled
+                showsHorizontalScrollIndicator={false}
+                ref={carouselRef}
+                onScroll={Animated.event(
+                  [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+                  { useNativeDriver: false }
+                )}
+              >
+                {videos.map((videoUri, index) => (
+                  <Video
+                    key={index}
+                    source={typeof videoUri === 'string' ? { uri: videoUri } : videoUri}
+                    style={styles.sliderImage}
+                    resizeMode="cover"
+                    isLooping
+                    shouldPlay
+                    isMuted={true}
+                  />
+                ))}
+              </ScrollView>
+            </View>
 
-        <View style={styles.iconsScrollContainer}>
-          <Text style={styles.sectionTitle}>እዚህ አፕ ላይ የሚገኙ ጥቅሞች</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <View style={styles.categoriesContainer}>
-              {categories.map((category, index) => (
-                <TouchableOpacity key={index} style={styles.categoryCard} onPress={() => handleIconPress(category)}>
-                  <View style={styles.iconContainer}>
-                    <Text style={styles.icon}>{category.icon}</Text>
-                  </View>
-                  <Text style={styles.iconName}>{category.name}</Text>
+            <View style={styles.iconsScrollContainer}>
+              <Text style={styles.sectionTitle}>እዚህ አፕ ላይ የሚገኙ ጥቅሞች</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                <View style={styles.categoriesContainer}>
+                  {categories.map((category, index) => (
+                    <TouchableOpacity key={index} style={styles.categoryCard} onPress={() => handleIconPress(category)}>
+                      <View style={styles.iconContainer}>
+                        <Text style={styles.icon}>{category.icon}</Text>
+                      </View>
+                      <Text style={styles.iconName}>{category.name}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </ScrollView>
+            </View>
+
+            <View style={styles.calendarContainer}>
+              <View style={styles.calendarHeader}>
+                <FeatherIcon name="calendar" size={30} color="#0069fe" />
+                <Text style={styles.calendarHeaderText}>በአላት እና አፅዋማት</Text>
+                <Text style={styles.calendarDate}>8/3/2024</Text>
+              </View>
+              <View style={styles.calendarContent}>
+                <Text style={styles.calendarDateText}>Saturday, August 3, 2024</Text>
+                <Text style={styles.calendarTitle}>Week 6 after Pentecost</Text>
+                <View style={styles.calendarFastingContainer}>
+                  <Image source={require("../assets/Orthodox_pr.png")} style={styles.fastingIcon} />
+                  <Text style={styles.fastingText}>No fast</Text>
+                </View>
+              </View>
+            </View>
+
+            <View style={styles.scheduleContainer}>
+              <View style={styles.scheduleHeader}>
+                <FeatherIcon name="clock" size={30} color="#0069fe" />
+                <Text style={styles.scheduleHeaderText}>SCHEDULE OF SERVICES/  የቤተክርስቲያን መረሃግብሮች</Text>
+              </View>
+              <View style={styles.separatorLine} />
+              <View style={styles.scheduleContent}>
+                <Text style={styles.scheduleDateText}>August 04 Sunday</Text>
+                <Text style={styles.scheduleTitle}>
+                  6th Sunday after Pentecost; Holy Myrrhbearer and Equal-to-the-Apostles Mary Magdalene (1st C)
+                </Text>
+                <Text style={styles.scheduleTime}>10:00 — Divine Liturgy</Text>
+                <TouchableOpacity>
+                  <Text style={styles.scheduleMore}>MORE...</Text>
                 </TouchableOpacity>
-              ))}
+              </View>
+            </View>
+            <View style={styles.scheduleContainer}>
+              <View style={styles.scheduleHeader}>
+                <FontAwesome5 name="newspaper" size={30} color="#0069fe" />
+                <Text style={styles.scheduleHeaderText}>News/   የቤተክርስቲያን ዜናዎች</Text>
+              </View>
+              <View style={styles.separatorLine} />
+              <View style={styles.scheduleContent}>
+                <Text style={styles.scheduleDateText}>August 04 Sunday</Text>
+                <Text style={styles.scheduleTitle}>
+                  6th Sunday after Pentecost; Holy Myrrhbearer and Equal-to-the-Apostles Mary Magdalene (1st C)
+                </Text>
+                <Text style={styles.scheduleTime}>10:00 — Divine Liturgy</Text>
+                <TouchableOpacity>
+                  <Text style={styles.scheduleMore}>MORE...</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+            <View style={styles.scheduleContainer}>
+              <View style={styles.scheduleHeader}>
+                <MaterialCommunityIcons name="frequently-asked-questions" size={30} color="#0069fe" />
+                <Text style={styles.scheduleHeaderText}>Q&A/   ጥያቄ እና መልስ</Text>
+              </View>
+              <View style={styles.separatorLine} />
+              <View style={styles.scheduleContent}>
+                <Text style={styles.scheduleDateText}>August 04 Sunday</Text>
+                <Text style={styles.scheduleTitle}>
+                  6th Sunday after Pentecost; Holy Myrrhbearer and Equal-to-the-Apostles Mary Magdalene (1st C)
+                </Text>
+                <Text style={styles.scheduleTime}>Uploaded by</Text>
+                <TouchableOpacity>
+                  <Text style={styles.scheduleMore}>MORE...</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </ScrollView>
-        </View>
+        </>
+      )}
 
-        <View style={styles.calendarContainer}>
-          <View style={styles.calendarHeader}>
-            <FeatherIcon name="calendar" size={30} color="#0069fe" />
-            <Text style={styles.calendarHeaderText}>በአላት እና አፅዋማት</Text>
-            <Text style={styles.calendarDate}>8/3/2024</Text>
-          </View>
-          <View style={styles.calendarContent}>
-            <Text style={styles.calendarDateText}>Saturday, August 3, 2024</Text>
-            <Text style={styles.calendarTitle}>Week 6 after Pentecost</Text>
-            <View style={styles.calendarFastingContainer}>
-              <Image source={require("../assets/Orthodox_pr.png")} style={styles.fastingIcon} />
-              <Text style={styles.fastingText}>No fast</Text>
-            </View>
-          </View>
-        </View>
-
-        <View style={styles.scheduleContainer}>
-          <View style={styles.scheduleHeader}>
-            <FeatherIcon name="clock" size={30} color="#0069fe" />
-            <Text style={styles.scheduleHeaderText}>SCHEDULE OF SERVICES/  የቤተክርስቲያን መረሃግብሮች</Text>
-          </View>
-          <View style={styles.separatorLine} />
-          <View style={styles.scheduleContent}>
-            <Text style={styles.scheduleDateText}>August 04 Sunday</Text>
-            <Text style={styles.scheduleTitle}>
-              6th Sunday after Pentecost; Holy Myrrhbearer and Equal-to-the-Apostles Mary Magdalene (1st C)
-            </Text>
-            <Text style={styles.scheduleTime}>10:00 — Divine Liturgy</Text>
-            <TouchableOpacity>
-              <Text style={styles.scheduleMore}>MORE...</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-        <View style={styles.scheduleContainer}>
-          <View style={styles.scheduleHeader}>
-            <FontAwesome5 name="newspaper" size={30} color="#0069fe" />
-            <Text style={styles.scheduleHeaderText}>News/   የቤተክርስቲያን ዜናዎች</Text>
-          </View>
-          <View style={styles.separatorLine} />
-          <View style={styles.scheduleContent}>
-            <Text style={styles.scheduleDateText}>August 04 Sunday</Text>
-            <Text style={styles.scheduleTitle}>
-              6th Sunday after Pentecost; Holy Myrrhbearer and Equal-to-the-Apostles Mary Magdalene (1st C)
-            </Text>
-            <Text style={styles.scheduleTime}>10:00 — Divine Liturgy</Text>
-            <TouchableOpacity>
-              <Text style={styles.scheduleMore}>MORE...</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-        <View style={styles.scheduleContainer}>
-          <View style={styles.scheduleHeader}>
-            <MaterialCommunityIcons name="frequently-asked-questions" size={30} color="#0069fe" />
-            <Text style={styles.scheduleHeaderText}>Q&A/   ጥያቄ እና መልስ</Text>
-          </View>
-          <View style={styles.separatorLine} />
-          <View style={styles.scheduleContent}>
-            <Text style={styles.scheduleDateText}>August 04 Sunday</Text>
-            <Text style={styles.scheduleTitle}>
-              6th Sunday after Pentecost; Holy Myrrhbearer and Equal-to-the-Apostles Mary Magdalene (1st C)
-            </Text>
-            <Text style={styles.scheduleTime}>Uploaded by</Text>
-            <TouchableOpacity>
-              <Text style={styles.scheduleMore}>MORE...</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-      </ScrollView>
-
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={menuVisible}
-        onRequestClose={handleOutsidePress}
-      >
-        <TouchableOpacity style={styles.menuOverlay} activeOpacity={1} onPress={handleOutsidePress}>
-          <View style={styles.menuContent}>
-            <View style={styles.menuGrid}>
-              {categories.map((category, index) => (
-                <TouchableOpacity key={index} style={styles.menuItem} onPress={() => handleIconPress(category)}>
-                  <Text style={styles.menuIcon}>{category.icon}</Text>
-                  <Text style={styles.menuItemText}>{category.name}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-            <Pressable style={[styles.button, styles.buttonClose]} onPress={() => setMenuVisible(false)}>
-              <Text style={styles.textStyle}>Close</Text>
-            </Pressable>
-          </View>
-        </TouchableOpacity>
-      </Modal>
-
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={notificationsVisible}
-        onRequestClose={handleOutsidePress}
-      >
-        <TouchableOpacity style={styles.notificationOverlay} activeOpacity={1} onPress={handleOutsidePress}>
-          <View style={styles.notificationContent}>
-            <Text style={styles.notificationTitle}>Notifications</Text>
-            <Text style={styles.notificationItem}>Notification 1</Text>
-            <Text style={styles.notificationItem}>Notification 2</Text>
-            <Text style={styles.notificationItem}>Notification 3</Text>
-          </View>
-        </TouchableOpacity>
-      </Modal>
+      {activeScreen === 'work' && <Work navigation={{ goBack }} />}
     </SafeAreaView>
   );
 };
@@ -506,6 +481,21 @@ const styles = StyleSheet.create({
   notificationItem: {
     fontSize: 16,
     paddingVertical: 10,
+  },
+  bottomNav: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    padding: 10,
+    backgroundColor: '#fff',
+    borderTopWidth: 1,
+    borderTopColor: '#ccc',
+  },
+  navItem: {
+    alignItems: 'center',
+  },
+  navText: {
+    fontSize: 12,
+    color: '#000',
   },
 });
 
