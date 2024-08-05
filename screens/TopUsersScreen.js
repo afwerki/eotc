@@ -30,7 +30,7 @@ const TopUsersScreen = () => {
   useEffect(() => {
     const fetchTopUsers = async () => {
       try {
-        const response = await fetch('https://7306-92-236-121-121.ngrok-free.app/api/top-users');
+        const response = await fetch('https://6944-92-236-121-121.ngrok-free.app/api/top-users');
         const data = await response.json();
         if (!response.ok) {
           throw new Error(data.message || 'Failed to load top users');

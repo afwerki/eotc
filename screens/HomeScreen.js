@@ -17,14 +17,19 @@ import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import TopNavScreen from "./TopNavScreen";
 import Work from "./Work";
+import Rent from "./RentHouse";
+import Mezmur from "./MezmurScreen";
+import News from "./NewsScreen";
+import Books from "./BooksScreen";
+import Projects from "./ProjectsScreen";
 
 const categories = [
-  { icon: "🏨", name: "ስራ/ Work" },
-  { icon: "🏨", name: "ቤት ኪራይ/ Rent" },
-  { icon: "🎵", name: "መዝሙር" },
-  { icon: "📰", name: "የቤተክርስቲያን ዜናዎች" },
-  { icon: "📚", name: "መፃህፍህት" },
-  { icon: "📂", name: "Projects" },
+  { icon: "🏨", name: "ስራ/ Work", count: 10 },
+  { icon: "🏠", name: "ቤት ኪራይ/ Rent", count: 5 },
+  { icon: "🎵", name: "መዝሙር", count: 7 },
+  { icon: "📰", name: "የቤተክርስቲያን ዜናዎች", count: 8 },
+  { icon: "📚", name: "መፃህፍህት", count: 12 },
+  { icon: "📂", name: "Projects", count: 3 },
 ];
 
 const videos = [
@@ -57,8 +62,27 @@ const HomeScreen = ({ navigation }) => {
   };
 
   const handleIconPress = (category) => {
-    if (category.name === "ስራ/ Work") {
-      setActiveScreen('work');
+    switch (category.name) {
+      case "ስራ/ Work":
+        setActiveScreen('work');
+        break;
+      case "ቤት ኪራይ/ Rent":
+        setActiveScreen('rent');
+        break;
+      case "መዝሙር":
+        setActiveScreen('mezmur');
+        break;
+      case "የቤተክርስቲያን ዜናዎች":
+        setActiveScreen('news');
+        break;
+      case "መፃህፍህት":
+        setActiveScreen('books');
+        break;
+      case "Projects":
+        setActiveScreen('projects');
+        break;
+      default:
+        setActiveScreen('home');
     }
   };
 
@@ -109,12 +133,33 @@ const HomeScreen = ({ navigation }) => {
                     <TouchableOpacity key={index} style={styles.categoryCard} onPress={() => handleIconPress(category)}>
                       <View style={styles.iconContainer}>
                         <Text style={styles.icon}>{category.icon}</Text>
+                        <View style={styles.badge}>
+                          <Text style={styles.badgeText}>{category.count}</Text>
+                        </View>
                       </View>
                       <Text style={styles.iconName}>{category.name}</Text>
                     </TouchableOpacity>
                   ))}
                 </View>
               </ScrollView>
+            </View>
+
+            <View style={styles.scheduleContainer}>
+              <View style={styles.scheduleHeader}>
+                <MaterialCommunityIcons name="frequently-asked-questions" size={30} color="#0069fe" />
+                <Text style={styles.scheduleHeaderText}>Q&A/ ጥያቄ እና መልስ</Text>
+              </View>
+              <View style={styles.separatorLine} />
+              <View style={styles.scheduleContent}>
+                <Text style={styles.scheduleDateText}>August 04 Sunday</Text>
+                <Text style={styles.scheduleTitle}>
+                  6th Sunday after Pentecost; Holy Myrrhbearer and Equal-to-the-Apostles Mary Magdalene (1st C)
+                </Text>
+                <Text style={styles.scheduleTime}>Uploaded by</Text>
+                <TouchableOpacity>
+                  <Text style={styles.scheduleMore}>MORE...</Text>
+                </TouchableOpacity>
+              </View>
             </View>
 
             <View style={styles.calendarContainer}>
@@ -136,7 +181,7 @@ const HomeScreen = ({ navigation }) => {
             <View style={styles.scheduleContainer}>
               <View style={styles.scheduleHeader}>
                 <FeatherIcon name="clock" size={30} color="#0069fe" />
-                <Text style={styles.scheduleHeaderText}>SCHEDULE OF SERVICES/  የቤተክርስቲያን መረሃግብሮች</Text>
+                <Text style={styles.scheduleHeaderText}>SCHEDULE OF SERVICES/ የቤተክርስቲያን መረሃግብሮች</Text>
               </View>
               <View style={styles.separatorLine} />
               <View style={styles.scheduleContent}>
@@ -150,10 +195,11 @@ const HomeScreen = ({ navigation }) => {
                 </TouchableOpacity>
               </View>
             </View>
+
             <View style={styles.scheduleContainer}>
               <View style={styles.scheduleHeader}>
                 <FontAwesome5 name="newspaper" size={30} color="#0069fe" />
-                <Text style={styles.scheduleHeaderText}>News/   የቤተክርስቲያን ዜናዎች</Text>
+                <Text style={styles.scheduleHeaderText}>News/ የቤተክርስቲያን ዜናዎች</Text>
               </View>
               <View style={styles.separatorLine} />
               <View style={styles.scheduleContent}>
@@ -162,23 +208,6 @@ const HomeScreen = ({ navigation }) => {
                   6th Sunday after Pentecost; Holy Myrrhbearer and Equal-to-the-Apostles Mary Magdalene (1st C)
                 </Text>
                 <Text style={styles.scheduleTime}>10:00 — Divine Liturgy</Text>
-                <TouchableOpacity>
-                  <Text style={styles.scheduleMore}>MORE...</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-            <View style={styles.scheduleContainer}>
-              <View style={styles.scheduleHeader}>
-                <MaterialCommunityIcons name="frequently-asked-questions" size={30} color="#0069fe" />
-                <Text style={styles.scheduleHeaderText}>Q&A/   ጥያቄ እና መልስ</Text>
-              </View>
-              <View style={styles.separatorLine} />
-              <View style={styles.scheduleContent}>
-                <Text style={styles.scheduleDateText}>August 04 Sunday</Text>
-                <Text style={styles.scheduleTitle}>
-                  6th Sunday after Pentecost; Holy Myrrhbearer and Equal-to-the-Apostles Mary Magdalene (1st C)
-                </Text>
-                <Text style={styles.scheduleTime}>Uploaded by</Text>
                 <TouchableOpacity>
                   <Text style={styles.scheduleMore}>MORE...</Text>
                 </TouchableOpacity>
@@ -189,6 +218,11 @@ const HomeScreen = ({ navigation }) => {
       )}
 
       {activeScreen === 'work' && <Work navigation={{ goBack }} />}
+      {activeScreen === 'rent' && <Rent navigation={{ goBack }} />}
+      {activeScreen === 'mezmur' && <Mezmur navigation={{ goBack }} />}
+      {activeScreen === 'news' && <News navigation={{ goBack }} />}
+      {activeScreen === 'books' && <Books navigation={{ goBack }} />}
+      {activeScreen === 'projects' && <Projects navigation={{ goBack }} />}
     </SafeAreaView>
   );
 };
@@ -250,6 +284,18 @@ const styles = StyleSheet.create({
   icon: {
     fontSize: 24,
     color: "#0069fe",
+  },
+  badge: {
+    position: 'absolute',
+    top: -5,
+    right: -5,
+    backgroundColor: 'red',
+    borderRadius: 10,
+    paddingHorizontal: 5,
+  },
+  badgeText: {
+    color: 'white',
+    fontSize: 10,
   },
   iconName: {
     fontSize: 12,
@@ -481,21 +527,6 @@ const styles = StyleSheet.create({
   notificationItem: {
     fontSize: 16,
     paddingVertical: 10,
-  },
-  bottomNav: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    padding: 10,
-    backgroundColor: '#fff',
-    borderTopWidth: 1,
-    borderTopColor: '#ccc',
-  },
-  navItem: {
-    alignItems: 'center',
-  },
-  navText: {
-    fontSize: 12,
-    color: '#000',
   },
 });
 
