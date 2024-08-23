@@ -2,14 +2,14 @@ import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import ProfileScreen_simple from '../screens/ProfileScreen_simple';
 import QuestionsUploadScreen from '../screens/uploading/QuestionsUploadScreen';
+import MezmurUpload from '../screens/uploading/Upload_mezmur';
 import Alert from '../screens/uploading/Alret';
-import learning from '../screens/uploading/Learning';
+import Segmentation from '../screens/SegmentationScreen';
 import ProjectProposal from '../screens/uploading/ProjectProposal';
 import Work from '../screens/uploading/Work';
 import RentHouse from '../screens/uploading/RentHouse';
 import QuizzingScreen from '../screens/QuizzingScreen';
 import TopUsersScreen from '../screens/TopUsersScreen';
-
 const Stack = createStackNavigator();
 
 const ProfileStackNavigator = () => {
@@ -22,8 +22,13 @@ const ProfileStackNavigator = () => {
       />
       <Stack.Screen
         name="QuestionsUpload"
-        component={TopUsersScreen}
+        component={QuizzingScreen}
         options={{ title: 'Upload Questions' }}
+      />
+      <Stack.Screen
+        name="MezmurUpload"
+        component={MezmurUpload}
+        options={{ title: 'Upload mezmur' }}
       />
       <Stack.Screen
         name="Alert"
@@ -31,9 +36,9 @@ const ProfileStackNavigator = () => {
         options={{ title: 'Alert' }}
       />
       <Stack.Screen
-        name="learning"
-        component={learning}
-        options={{ title: 'learning' }}
+        name="Segmentation"
+        component={Segmentation}
+        options={{ title: 'Segmentation' }}
       />
       <Stack.Screen
         name="ProjectProposal"
@@ -50,7 +55,6 @@ const ProfileStackNavigator = () => {
         component={RentHouse }
         options={{ title: 'Rent house'}}
       />
-
     </Stack.Navigator>
   );
 };

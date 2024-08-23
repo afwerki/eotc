@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity, Dimensions, Alert } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity, Alert, Dimensions } from 'react-native';
+import { useAuth } from '../screens/context/AuthContext'; // Importing useAuth
 import Svg, { Circle } from 'react-native-svg';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const LoginScreen = ({ navigation }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const { login } = useAuth(); // Accessing login function from AuthContext
 
-  const { width, height } = Dimensions.get('window');
+  const { width, height } = Dimensions.get('window'); // To set dimensions for SVG
 
   const handleLogin = async () => {
     if (!username || !password) {
@@ -16,7 +18,7 @@ const LoginScreen = ({ navigation }) => {
     }
 
     try {
-      const response = await fetch('https://6944-92-236-121-121.ngrok-free.app/login', {
+      const response = await fetch('https://12bb-92-236-121-121.ngrok-free.app/api/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -29,9 +31,8 @@ const LoginScreen = ({ navigation }) => {
       if (response.status === 200) {
         await AsyncStorage.setItem('userId', result.userId.toString());
         await AsyncStorage.setItem('username', result.username);
-        console.log('Stored userId:', result.userId); // Debug log
-        console.log('Stored username:', result.username); // Debug log
-        Alert.alert("Success", "Login successful!", [{ text: "OK", onPress: () => navigation.replace('Main') }]); // Navigate to MainTabNavigator
+        login(result.username, result.role); // Store username and role in AuthContext
+        navigation.replace('Main'); // Navigate to MainTabNavigator
       } else {
         Alert.alert("Error", result.message || "Login failed.");
       }
@@ -41,57 +42,33 @@ const LoginScreen = ({ navigation }) => {
     }
   };
 
-  const clearAsyncStorageAndNavigate = async () => {
-    try {
-      await AsyncStorage.clear();
-      navigation.replace('Welcome'); // Navigate to Welcome screen after clearing storage
-    } catch (error) {
-      console.error('Failed to clear AsyncStorage', error);
-    }
-  };
-
   return (
     <View style={styles.container}>
       <Svg height={height * 0.3} width={width} style={styles.svg}>
         <Circle cx={width * 0.3} cy={-height * 0.1} r={height * 0.3} fill="#82d7f7" />
         <Circle cx={width * 0.5} cy={height * 0.05} r={height * 0.2} fill="#82d7f7" opacity="0.5" />
       </Svg>
-
-      <View style={styles.content}>
-        <Text style={styles.welcomeText}>Welcome back</Text>
-        <TextInput
-          style={styles.input}
-          autoCapitalize="none"
-          autoCorrect={false}
-          placeholder="Username"
-          placeholderTextColor='#999'
-          value={username}
-          onChangeText={setUsername}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          placeholderTextColor='#999'
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-        />
-        <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
-          <Text style={styles.forgotPassword}>Forgot password</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={handleLogin} style={styles.signinButton}>
-          <Text style={styles.signinText}>Login</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('Registration')} style={styles.signuplink}>
-          <Text style={styles.signupText}>Don't have an account? Register here</Text>
-        </TouchableOpacity>
-
-        {/* Button to clear AsyncStorage and navigate to Welcome screen */}
-        <View style={styles.clearButtonContainer}>
-          <Button title="Clear Storage" onPress={clearAsyncStorageAndNavigate} />
-        </View>
-      </View>
+      <Text style={styles.welcomeText}>Welcome back</Text>
+      <TextInput
+        style={styles.input}
+        autoCapitalize="none"
+        autoCorrect={false}
+        placeholder="Username"
+        placeholderTextColor='#999'
+        value={username}
+        onChangeText={setUsername}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Password"
+        placeholderTextColor='#999'
+        secureTextEntry
+        value={password}
+        onChangeText={setPassword}
+      />
+      <TouchableOpacity onPress={handleLogin} style={styles.signinButton}>
+        <Text style={styles.signinText}>Login</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -100,47 +77,22 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
+    justifyContent: 'center',
+    paddingHorizontal: 20,
   },
   svg: {
     position: 'absolute',
     top: 0,
     left: 0,
   },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-  },
   welcomeText: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
     color: '#333',
-  },
-  forgotPassword: {
-    color: '#82d7f7',
-    marginBottom: 30,
-  },
-  signinButton: {
-    width: '100%',
-    height: 50,
-    backgroundColor: '#82d7f7',
-    borderRadius: 25,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  signinText: {
-    color: '#fff',
-    fontSize: 18,
-  },
-  signupText: {
-    color: '#000',
-    fontWeight: 'bold',
+    textAlign: 'center',
   },
   input: {
-    width: '100%',
     height: 50,
     backgroundColor: '#fff',
     borderRadius: 25,
@@ -149,9 +101,16 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ddd',
   },
-  clearButtonContainer: {
-    marginTop: 20,
+  signinButton: {
+    height: 50,
+    backgroundColor: '#82d7f7',
+    borderRadius: 25,
+    justifyContent: 'center',
     alignItems: 'center',
+  },
+  signinText: {
+    color: '#fff',
+    fontSize: 18,
   },
 });
 

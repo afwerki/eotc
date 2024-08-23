@@ -60,11 +60,8 @@ const RegistrationScreen = ({ navigation }) => {
     });
 
     try {
-      const response = await fetch('https://6944-92-236-121-121.ngrok-free.app/register', {
+      const response = await fetch('https://12bb-92-236-121-121.ngrok-free.app/api/register', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
         body: registrationData,
       });
 

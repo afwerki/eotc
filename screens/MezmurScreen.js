@@ -13,7 +13,6 @@ import {
 } from "react-native";
 import FeatherIcon from 'react-native-vector-icons/Feather';
 import { Link } from 'expo-router';
-import TopNavScreen from "./TopNavScreen"; // Import the TopNavScreen component
 
 const MezmurScreen = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -66,15 +65,11 @@ const MezmurScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <TopNavScreen 
-        onBellPress={() => console.log('Bell Pressed')} 
-        onMenuPress={() => console.log('Menu Pressed')} 
-      />
       <ScrollView>
         <View style={styles.main}>
-          <View>
-            <Link href={"/(modals)/Upload_mezmur"} style={{ textDecorationLine: 'underline' }}> Upload Mezmur</Link>
-          </View>
+          <Link href="/upload/Upload_mezmur" style={{ textDecorationLine: 'underline' }}>
+            Upload Mezmur
+          </Link>
           <View style={styles.headerSearch}>
             <View style={styles.headerSearchIcon}>
               <FeatherIcon color="#778599" name="search" size={17} />

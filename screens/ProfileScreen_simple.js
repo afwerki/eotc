@@ -200,10 +200,26 @@ const ProfileScreen_simple = ({ navigation }) => {
               <View style={styles.rowWrapper}>
                 <TouchableOpacity
                   onPress={() => {
-                    navigation.navigate('learning');
+                    navigation.navigate('Segmentation');
                   }}
                   style={styles.row}>
-                  <Text style={styles.rowLabel}>Add important learning</Text>
+                  <Text style={styles.rowLabel}>Segmentation</Text>
+
+                  <View style={styles.rowSpacer} />
+
+                  <FeatherIcon
+                    color="#bcbcbc"
+                    name="chevron-right"
+                    size={19} />
+                </TouchableOpacity>
+              </View>
+              <View style={styles.rowWrapper}>
+                <TouchableOpacity
+                  onPress={() => {
+                    navigation.navigate('Segmentation');
+                  }}
+                  style={styles.row}>
+                  <Text style={styles.rowLabel}>Important learning</Text>
 
                   <View style={styles.rowSpacer} />
 

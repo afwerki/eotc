@@ -11,7 +11,6 @@ import {
   Modal,
 } from "react-native";
 import FeatherIcon from 'react-native-vector-icons/Feather';
-import TopNavScreen from "./TopNavScreen"; // Import the TopNavScreen component
 
 const NewsScreen = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -64,10 +63,6 @@ const NewsScreen = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <TopNavScreen 
-        onBellPress={() => console.log('Bell Pressed')} 
-        onMenuPress={() => console.log('Menu Pressed')} 
-      />
       <ScrollView>
         <View style={styles.main}>
           <View style={styles.headerSearch}>

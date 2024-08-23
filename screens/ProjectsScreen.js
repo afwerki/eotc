@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Modal, Button, ScrollView, SafeAreaView } from 'react-native';
-import TopNavScreen from "./TopNavScreen"; // Import the TopNavScreen component
 
 const ProjectsScreen = () => {
   const [items, setItems] = useState([]);
@@ -10,7 +9,7 @@ const ProjectsScreen = () => {
 
   useEffect(() => {
     // Fetch data from the API
-    fetch('https://6944-92-236-121-121.ngrok-free.app/projects')
+    fetch('https://12bb-92-236-121-121.ngrok-free.app/projects')
       .then(response => response.json())
       .then(data => {
         setItems(data);
@@ -46,10 +45,6 @@ const ProjectsScreen = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <TopNavScreen 
-        onBellPress={() => console.log('Bell Pressed')} 
-        onMenuPress={() => console.log('Menu Pressed')} 
-      />
       <View style={styles.container}>
         <Text style={styles.title}>Projects</Text>
 
