@@ -4,24 +4,17 @@ import { Video } from 'expo-av';
 import Feather from 'react-native-vector-icons/Feather';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-
-const categories = [
-  { icon: "🏨", name: "ስራ/ Work", route: "WorkStack", count: 10 },
-  { icon: "🏠", name: "ቤት ኪራይ/ Rent", route: "RentStack", count: 5 },
-  { icon: "🎵", name: "መዝሙር", route: "MezmurStack", count: 7 },
-  { icon: "📰", name: "የቤተክርስቲያን ዜናዎች", route: "NewsStack", count: 8 },
-  { icon: "📚", name: "መፃህፍህት", route: "BooksStack", count: 12 },
-  { icon: "📂", name: "Projects", route: "ProjectsStack", count: 3 },
-];
+import { useNavigation } from '@react-navigation/native';
 
 const videos = [
   require('../assets/mezmure.mp4'),
   require('../assets/meskel.mp4'),
 ];
 
-const HomeScreen = ({ navigation }) => {
+const HomeScreen = () => {
   const carouselRef = useRef(null);
   const scrollX = useRef(new Animated.Value(0)).current;
+  const navigation = useNavigation();
 
   useEffect(() => {
     let position = 0;
@@ -33,10 +26,6 @@ const HomeScreen = ({ navigation }) => {
     }, 12000);
     return () => clearInterval(interval);
   }, [carouselRef]);
-
-  const handleIconPress = (route) => {
-    navigation.navigate(route);
-  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -70,17 +59,109 @@ const HomeScreen = ({ navigation }) => {
           <Text style={styles.sectionTitle}>እዚህ አፕ ላይ የሚገኙ ጥቅሞች</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <View style={styles.categoriesContainer}>
-              {categories.map((category, index) => (
-                <TouchableOpacity key={index} style={styles.categoryCard} onPress={() => handleIconPress(category.route)}>
-                  <View style={styles.iconContainer}>
-                    <Text style={styles.icon}>{category.icon}</Text>
-                    <View style={styles.badge}>
-                      <Text style={styles.badgeText}>{category.count}</Text>
-                    </View>
+
+              <View style={styles.categoryCard}>
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('WorkStack')}
+                  style={styles.iconContainer}
+                >
+                  <Text style={styles.icon}>🏨</Text>
+                  <View style={styles.badge}>
+                    <Text style={styles.badgeText}>10</Text>
                   </View>
-                  <Text style={styles.iconName}>{category.name}</Text>
                 </TouchableOpacity>
-              ))}
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('WorkStack')}
+                >
+                  <Text style={styles.iconName}>ስራ/ Work</Text>
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.categoryCard}>
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('RentStack')}
+                  style={styles.iconContainer}
+                >
+                  <Text style={styles.icon}>🏠</Text>
+                  <View style={styles.badge}>
+                    <Text style={styles.badgeText}>5</Text>
+                  </View>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('RentStack')}
+                >
+                  <Text style={styles.iconName}>ቤት ኪራይ/ Rent</Text>
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.categoryCard}>
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('MezmurStack')}
+                  style={styles.iconContainer}
+                >
+                  <Text style={styles.icon}>🎵</Text>
+                  <View style={styles.badge}>
+                    <Text style={styles.badgeText}>7</Text>
+                  </View>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('MezmurStack')}
+                >
+                  <Text style={styles.iconName}>መዝሙር</Text>
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.categoryCard}>
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('NewsStack')}
+                  style={styles.iconContainer}
+                >
+                  <Text style={styles.icon}>📰</Text>
+                  <View style={styles.badge}>
+                    <Text style={styles.badgeText}>8</Text>
+                  </View>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('NewsStack')}
+                >
+                  <Text style={styles.iconName}>የቤተክርስቲያን ዜናዎች</Text>
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.categoryCard}>
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('BooksStack')}
+                  style={styles.iconContainer}
+                >
+                  <Text style={styles.icon}>📚</Text>
+                  <View style={styles.badge}>
+                    <Text style={styles.badgeText}>12</Text>
+                  </View>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('BooksStack')}
+                >
+                  <Text style={styles.iconName}>መፃህፍህት</Text>
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.categoryCard}>
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('ProjectsStack')}
+                  style={styles.iconContainer}
+                >
+                  <Text style={styles.icon}>📂</Text>
+                  <View style={styles.badge}>
+                    <Text style={styles.badgeText}>3</Text>
+                  </View>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('ProjectsStack')}
+                >
+                  <Text style={styles.iconName}>Projects</Text>
+                </TouchableOpacity>
+              </View>
+
             </View>
           </ScrollView>
         </View>
@@ -97,7 +178,7 @@ const HomeScreen = ({ navigation }) => {
               6th Sunday after Pentecost; Holy Myrrhbearer and Equal-to-the-Apostles Mary Magdalene (1st C)
             </Text>
             <Text style={styles.scheduleTime}>Uploaded by</Text>
-            <TouchableOpacity onPress={() => navigation.navigate('QuizzingScreen')}>
+            <TouchableOpacity onPress={() => navigation.navigate('Quizzing')}>
               <Text style={styles.scheduleMore}>MORE...</Text>
             </TouchableOpacity>
           </View>
@@ -148,8 +229,7 @@ const HomeScreen = ({ navigation }) => {
             <Text style={styles.scheduleTitle}>
               6th Sunday after Pentecost; Holy Myrrhbearer and Equal-to-the-Apostles Mary Magdalene (1st C)
             </Text>
-            <Text style={styles.scheduleTime}>10:00 — Divine Liturgy</Text>
-            <TouchableOpacity onPress={() => navigation.navigate('NewsScreen')}>
+            <TouchableOpacity onPress={() => navigation.navigate('NewsStack')}>
               <Text style={styles.scheduleMore}>MORE...</Text>
             </TouchableOpacity>
           </View>
@@ -158,7 +238,6 @@ const HomeScreen = ({ navigation }) => {
     </SafeAreaView>
   );
 };
-
 
 const styles = StyleSheet.create({
   container: {
@@ -217,17 +296,17 @@ const styles = StyleSheet.create({
   },
   badge: {
     position: 'absolute',
-    top: -2,  // Adjusted to position the badge better
-    right: 10, // Adjusted to position the badge better
+    top: -2,
+    right: 10,
     backgroundColor: 'red',
-    borderRadius: 12, // Adjusted to match the new badge size
-    paddingHorizontal: 8, // Increased padding for a bigger badge
-    paddingVertical: 4,  // Added vertical padding for a larger badge
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
   },
   badgeText: {
     color: 'white',
-    fontSize: 12, // Increased font size for better visibility
-    fontWeight: 'bold', // Added boldness to make the text stand out
+    fontSize: 12,
+    fontWeight: 'bold',
   },
   iconName: {
     fontSize: 12,

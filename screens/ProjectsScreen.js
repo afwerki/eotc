@@ -9,7 +9,7 @@ const ProjectsScreen = () => {
 
   useEffect(() => {
     // Fetch data from the API
-    fetch('https://12bb-92-236-121-121.ngrok-free.app/projects')
+    fetch('https://ce43-92-236-121-121.ngrok-free.app/projects')
       .then(response => response.json())
       .then(data => {
         setItems(data);

@@ -4,7 +4,7 @@ import Colors from '../constants/Colors';
 import { FontAwesome5, MaterialCommunityIcons, Octicons, Feather } from '@expo/vector-icons';
 import { useAuth } from '../screens/context/AuthContext';
 
-import HomeScreen from '../screens/HomeScreen';
+import HomeStackNavigator from './HomeStackNavigator'; // Import the HomeStackNavigator
 import NewsScreen from '../screens/NewsScreen';
 import BooksScreen from '../screens/BooksScreen';
 import MezmurScreen from '../screens/MezmurScreen';
@@ -25,7 +25,7 @@ const MainTabNavigator = () => {
     >
       <Tab.Screen
         name="Home"
-        component={HomeScreen}
+        component={HomeStackNavigator} // Replace HomeScreen with HomeStackNavigator
         options={{
           tabBarLabel: 'Home',
           tabBarIcon: ({ color, size }) => <FontAwesome5 name="home" color={color} size={size} />,

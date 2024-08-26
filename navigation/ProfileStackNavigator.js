@@ -25,6 +25,7 @@ const ProfileStackNavigator = () => {
         component={QuizzingScreen}
         options={{ title: 'Upload Questions' }}
       />
+      
       <Stack.Screen
         name="MezmurUpload"
         component={MezmurUpload}
