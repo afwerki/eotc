@@ -22,22 +22,22 @@ const HomeStackNavigator = () => {
       <Stack.Screen
         name="RentStack"
         component={RentHouse}
-        options={{ title: 'Rent House' }}
+        options={{ title: '                     ጊዜያዊ ቤቶች' }}
       />
       <Stack.Screen
         name="WorkStack"
         component={Work}
-        options={{ title: 'Work' }}
+        options={{ title: '              ጊዜያዊ ስራዎች' }}
       />
        <Stack.Screen
         name="Quizzing"
         component={Quizzing}
-        options={{ title: 'Questions and answers' }}
+        options={{ title: '  Questions and answers' }}
       />
       <Stack.Screen
         name="MezmurStack"
         component={MezmurUpload}
-        options={{ title: 'Upload Mezmur' }}
+        options={{ title: '                      መዝሙሮች' }}
       />
       <Stack.Screen
         name="NewsStack"
@@ -47,12 +47,12 @@ const HomeStackNavigator = () => {
       <Stack.Screen
         name="BooksStack"
         component={Segmentation}
-        options={{ title: 'Books' }}
+        options={{ title: '                              ቤተ መፃህፍት' }}
       />
       <Stack.Screen
         name="ProjectsStack"
         component={ProjectProposal}
-        options={{ title: 'Projects' }}
+        options={{ title: '                           Projects' }}
       />
     </Stack.Navigator>
   );

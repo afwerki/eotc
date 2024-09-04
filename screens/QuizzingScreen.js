@@ -19,7 +19,7 @@ const QuizzingScreen = () => {
         if (!userId) {
           throw new Error('User ID not found');
         }
-        const response = await fetch(`https://ce43-92-236-121-121.ngrok-free.app/api/questions`);
+        const response = await fetch(`https://3ad1-92-236-121-121.ngrok-free.app/api/questions`);
         const responseText = await response.text();
         console.log('Raw response:', responseText);  // Log raw response
         const data = JSON.parse(responseText);  // Parse JSON from the raw response
@@ -121,7 +121,7 @@ const QuizzingScreen = () => {
     }
 
     try {
-      const response = await fetch('https://ce43-92-236-121-121.ngrok-free.app/api/submit-answers', {
+      const response = await fetch('https://3ad1-92-236-121-121.ngrok-free.app/api/submit-answers', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -60,7 +60,7 @@ const RegistrationScreen = ({ navigation }) => {
     });
 
     try {
-      const response = await fetch('https://ce43-92-236-121-121.ngrok-free.app/api/register', {
+      const response = await fetch('https://3ad1-92-236-121-121.ngrok-free.app/api/register', {
         method: 'POST',
         body: registrationData,
       });

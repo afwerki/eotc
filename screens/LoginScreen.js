@@ -18,7 +18,7 @@ const LoginScreen = ({ navigation }) => {
     }
 
     try {
-      const response = await fetch('https://ce43-92-236-121-121.ngrok-free.app/api/login', {
+      const response = await fetch('https://3ad1-92-236-121-121.ngrok-free.app/api/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -80,6 +80,14 @@ const LoginScreen = ({ navigation }) => {
       <TouchableOpacity onPress={handleLogin} style={styles.signinButton}>
         <Text style={styles.signinText}>Login</Text>
       </TouchableOpacity>
+      
+      {/* Forgot Password and Registration options */}
+      <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
+        <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => navigation.navigate('RegistrationScreen')}>
+        <Text style={styles.registerText}>Don't have an account? Register</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -118,10 +126,22 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: 20,
   },
   signinText: {
     color: '#fff',
     fontSize: 18,
+  },
+  forgotPasswordText: {
+    color: '#82d7f7',
+    textAlign: 'center',
+    fontSize: 16,
+    marginBottom: 10,
+  },
+  registerText: {
+    color: '#333',
+    textAlign: 'center',
+    fontSize: 16,
   },
 });
 
