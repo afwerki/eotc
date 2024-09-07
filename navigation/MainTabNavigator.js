@@ -32,14 +32,6 @@ const MainTabNavigator = () => {
         }}
       />
       <Tab.Screen
-        name="Books"
-        component={BooksScreen}
-        options={{
-          tabBarLabel: 'Books',
-          tabBarIcon: ({ color, size }) => <FontAwesome5 name="book" color={color} size={size} />,
-        }}
-      />
-      <Tab.Screen
         name="Mezmur"
         component={MezmurScreen}
         options={{
@@ -53,14 +45,6 @@ const MainTabNavigator = () => {
         options={{
           tabBarLabel: 'News',
           tabBarIcon: ({ color, size }) => <MaterialCommunityIcons name="newspaper-variant-outline" color={color} size={size} />,
-        }}
-      />
-      <Tab.Screen
-        name="Projects"
-        component={ProjectsScreen}
-        options={{
-          tabBarLabel: 'Projects',
-          tabBarIcon: ({ color, size }) => <Octicons name="project" color={color} size={size} />,
         }}
       />
       <Tab.Screen

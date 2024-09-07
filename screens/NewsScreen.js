@@ -27,6 +27,30 @@ const NewsScreen = () => {
       tag: "የማሪያም መዝሙር",
       date: "Mar, 2023",
     },
+    {
+      img: "https://plus.unsplash.com/premium_photo-1677439907866-938da05a0ee0?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      title: "ሀኪም ሰብለ በእርግዝና ዙሪያ ለሴቶች ትምህርት መስጠት ትፈልጋለች።",
+      author: "አፍወርቅ",
+      authorImg: "https://media.istockphoto.com/id/157189484/photo/icon-madonna-with-child.webp?b=1&s=170667a&w=0&k=20&c=u90v28mLh8n2gW26vBHlpoMbRdxn8kk_TSTKToYslME=",
+      tag: "የማሪያም መዝሙር",
+      date: "Mar, 2023",
+    },
+    {
+      img: "https://plus.unsplash.com/premium_photo-1677439907866-938da05a0ee0?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      title: "ሀኪም ሰብለ በእርግዝና ዙሪያ ለሴቶች ትምህርት መስጠት ትፈልጋለች።",
+      author: "አፍወርቅ",
+      authorImg: "https://media.istockphoto.com/id/157189484/photo/icon-madonna-with-child.webp?b=1&s=170667a&w=0&k=20&c=u90v28mLh8n2gW26vBHlpoMbRdxn8kk_TSTKToYslME=",
+      tag: "የማሪያም መዝሙር",
+      date: "Mar, 2023",
+    },
+    {
+      img: "https://plus.unsplash.com/premium_photo-1677439907866-938da05a0ee0?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      title: "ሀኪም ሰብለ በእርግዝና ዙሪያ ለሴቶች ትምህርት መስጠት ትፈልጋለች።",
+      author: "አፍወርቅ",
+      authorImg: "https://media.istockphoto.com/id/157189484/photo/icon-madonna-with-child.webp?b=1&s=170667a&w=0&k=20&c=u90v28mLh8n2gW26vBHlpoMbRdxn8kk_TSTKToYslME=",
+      tag: "የማሪያም መዝሙር",
+      date: "Mar, 2023",
+    },
     // Add more items here
   ];
 
@@ -61,10 +85,13 @@ const NewsScreen = () => {
     return title;
   };
 
+  const featuredItem = items[0]; // Set the first item as the featured news item
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView>
         <View style={styles.main}>
+          {/* Header Search */}
           <View style={styles.headerSearch}>
             <View style={styles.headerSearchIcon}>
               <FeatherIcon color="#778599" name="search" size={17} />
@@ -79,40 +106,36 @@ const NewsScreen = () => {
               value={searchTerm}
             />
           </View>
+
+          {/* Featured News Item */}
+          {featuredItem && (
+            <View style={styles.featuredNews}>
+              <Image source={{ uri: featuredItem.img }} style={styles.featuredImage} />
+              <Text style={styles.featuredTitle}>{trimTitle(featuredItem.title)}</Text>
+            </View>
+          )}
+
           <View style={styles.separator}></View>
-          {(searchTerm ? filteredItems : items).map((item, index) => {
-            return (
-              <TouchableOpacity
-                key={index}
-                onPress={() => openModal(item)}
-                style={styles.newsItem}
-              >
-                <Image
-                  source={{ uri: item.img }}
-                  style={styles.newsImage}
-                />
-                <View style={styles.newsContent}>
-                  <Text style={styles.newsTitle}>{trimTitle(item.title)}</Text>
-                  <View style={styles.cardRow}>
-                    <View style={styles.cardRowItem}>
-                      <Image
-                        alt=""
-                        source={{ uri: item.authorImg }}
-                        style={styles.cardRowItemImage}
-                      />
-                      <Text style={styles.cardRowItemText}>{item.author}</Text>
-                    </View>
-                    <Text style={styles.cardRowDivider}>.</Text>
-                    <View style={styles.cardRowItem}>
-                      <Text style={styles.cardRowItemText}>{item.date}</Text>
-                    </View>
-                  </View>
-                </View>
-              </TouchableOpacity>
-            );
-          })}
+
+          {/* Grid of other news items */}
+          <View style={styles.gridContainer}>
+            {(searchTerm ? filteredItems : items).map((item, index) => {
+              return (
+                <TouchableOpacity
+                  key={index}
+                  onPress={() => openModal(item)}
+                  style={styles.gridItem}
+                >
+                  <Image source={{ uri: item.img }} style={styles.gridImage} />
+                  <Text style={styles.gridTitle}>{trimTitle(item.title)}</Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
         </View>
       </ScrollView>
+
+      {/* Modal for the selected news item */}
       {selectedItem && (
         <Modal
           animationType="slide"
@@ -177,56 +200,42 @@ const styles = StyleSheet.create({
     backgroundColor: '#ccc',
     marginVertical: 10,
   },
-  newsItem: {
+  // Featured article at the top
+  featuredNews: {
     marginBottom: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-    paddingBottom: 10,
-    flexDirection: 'row',
   },
-  newsImage: {
-    width: 100,
-    height: 100,
+  featuredImage: {
+    width: '100%',
+    height: 200,
     borderRadius: 10,
-    marginRight: 10,
   },
-  newsContent: {
-    flex: 1,
-  },
-  newsTitle: {
-    fontSize: 18,
+  featuredTitle: {
+    fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 5,
+    marginTop: 10,
+    marginBottom: 20,
+    color: '#000',
   },
-  cardRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: -8,
-    marginBottom: "auto",
+  // Grid for the rest of the news items
+  gridContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
   },
-  cardRowItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 6,
-    borderRightWidth: 1,
-    borderColor: "transparent",
+  gridItem: {
+    width: '48%', // Adjust the width to show two items per row
+    marginBottom: 20,
   },
-  cardRowItemImage: {
-    width: 22,
-    height: 22,
-    borderRadius: 9999,
-    marginRight: 6,
+  gridImage: {
+    width: '100%',
+    height: 150,
+    borderRadius: 10,
   },
-  cardRowItemText: {
-    fontWeight: "400",
-    fontSize: 13,
-    color: "#939393",
-  },
-  cardRowDivider: {
-    fontSize: 17,
-    fontWeight: "bold",
-    color: "#939393",
+  gridTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginTop: 10,
+    color: '#000',
   },
   modalContainer: {
     flex: 1,

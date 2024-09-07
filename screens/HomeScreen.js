@@ -165,8 +165,7 @@ const HomeScreen = () => {
             </View>
           </ScrollView>
         </View>
-
-        <View style={styles.scheduleContainer}>
+                <View style={styles.scheduleContainer}>
           <View style={styles.scheduleHeader}>
             <MaterialCommunityIcons name="frequently-asked-questions" size={30} color="#0069fe" />
             <Text style={styles.scheduleHeaderText}>Q&A/ ጥያቄ እና መልስ</Text>

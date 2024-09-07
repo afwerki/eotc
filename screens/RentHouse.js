@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import {
   StyleSheet,
   SafeAreaView,
@@ -7,146 +7,348 @@ import {
   TouchableOpacity,
   Image,
   Text,
+  TextInput,
+  Modal,
+  ActivityIndicator,
+  Alert
 } from 'react-native';
 import FontAwesome from 'react-native-vector-icons/FontAwesome5';
 import FeatherIcon from 'react-native-vector-icons/Feather';
 
-const places = [
-  {
-    id: 1,
-    img: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2340&q=80',
-    name: 'Marbella, Spain',
-    dates: 'Apr 23 - May 5',
-    price: 200,
-    rating: 4.45,
-    reviews: 124,
-  },
-  {
-    id: 2,
-    img: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2340&q=80',
-    name: 'Baveno, Italy',
-    dates: 'Apr 25 - May 5',
-    price: 320,
-    rating: 4.81,
-    reviews: 409,
-  },
-  {
-    id: 3,
-    img: 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
-    name: 'Tucson, Arizona',
-    dates: 'Apr 22 - May 4',
-    price: 695,
-    rating: 4.3,
-    reviews: 72,
-  },
-];
-
-const RentHouse= () =>{
+const RentHouse = () => {
+  const [places, setPlaces] = useState([]);
   const [saved, setSaved] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchText, setSearchText] = useState('');
+  const [detailsModalVisible, setDetailsModalVisible] = useState(false);
+  const [comment, setComment] = useState('');
+  const [formData, setFormData] = useState({
+    img: '',
+    name: '',
+    dates: '',
+    price: '',
+    rating: '',
+    reviews: ''
+  });
+  const [isEditing, setIsEditing] = useState(false);
+  const [selectedHouseId, setSelectedHouseId] = useState(null);
 
+  const apiUrl = 'https://c17f-92-236-121-121.ngrok-free.app/api/rent-house'; // Replace with your actual API URL
+
+  useEffect(() => {
+    fetchPlaces();
+  }, []);
+
+  // Fetch all houses
+  const fetchPlaces = async () => {
+    try {
+      const response = await fetch(apiUrl);
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status} - ${response.statusText}`);
+      }
+      const data = await response.json();
+
+      // Normalize data field names
+      const normalizedData = data.map(item => ({
+        id: item.id,
+        name: item.name,
+        img: item.img,
+        dates: item.dates,
+        price: item.price,
+        rating: item.rating,
+        reviews: item.reviews
+      }));
+
+      setPlaces(normalizedData);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching places:', error);
+      setLoading(false);
+    }
+  };
+
+  // Handle saving a house to saved list
   const handleSave = useCallback(
     id => {
       if (saved.includes(id)) {
-        // remove listing id from the `saved` array
         setSaved(saved.filter(val => val !== id));
       } else {
-        // add listing id to the `saved` array
         setSaved([...saved, id]);
       }
     },
-    [saved],
+    [saved]
   );
+
+  // Open the modal to add a new house
+  const openDetailsModal = (house = null) => {
+    if (house) {
+      setFormData({
+        img: house.img,
+        name: house.name,
+        dates: house.dates,
+        price: house.price,
+        rating: house.rating,
+        reviews: house.reviews
+      });
+      setIsEditing(true);
+      setSelectedHouseId(house.id);
+    } else {
+      setFormData({
+        img: '',
+        name: '',
+        dates: '',
+        price: '',
+        rating: '',
+        reviews: ''
+      });
+      setIsEditing(false);
+      setSelectedHouseId(null);
+    }
+    setDetailsModalVisible(true);
+  };
+
+  // Close the add/edit house modal
+  const closeDetailsModal = () => {
+    setDetailsModalVisible(false);
+  };
+
+  // Handle form submission to add or edit a house
+  const handleFormSubmit = async () => {
+    const { img, name, dates, price, rating, reviews } = formData;
+
+    if (!img || !name || !dates || !price || !rating || !reviews) {
+      Alert.alert("Please fill in all fields.");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        isEditing ? `${apiUrl}/${selectedHouseId}` : apiUrl,
+        {
+          method: isEditing ? 'PUT' : 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData)
+        }
+      );
+
+      if (response.ok) {
+        fetchPlaces(); // Refresh the list
+        closeDetailsModal();
+        Alert.alert('Success', isEditing ? 'House updated successfully!' : 'House added successfully!');
+      } else {
+        const errorData = await response.json();
+        Alert.alert('Failed', errorData.message);
+      }
+    } catch (error) {
+      console.error('Error during house submission:', error.message);
+      Alert.alert('Error', 'An error occurred. Please try again.');
+    }
+  };
+
+  // Handle deleting a house
+  const handleDeleteHouse = async (id) => {
+    try {
+      const response = await fetch(`${apiUrl}/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        fetchPlaces(); // Refresh the list
+        Alert.alert('Success', 'House deleted successfully!');
+      } else {
+        Alert.alert('Failed', 'Unable to delete the house.');
+      }
+    } catch (error) {
+      console.error('Error during deletion:', error.message);
+      Alert.alert('Error', 'An error occurred while deleting the house.');
+    }
+  };
+
+  // Handle submitting a comment
+  const handleCommentSubmit = async (houseId) => {
+    if (!comment) {
+      Alert.alert('Please enter a comment.');
+      return;
+    }
+
+    // Perform your logic to handle comment submission here
+    Alert.alert('Success', `Comment submitted for house ID: ${houseId}`);
+    setComment('');
+  };
+
+  if (loading) {
+    return (
+      <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#f2f2f2' }}>
       <View style={styles.container}>
         <View style={styles.header}>
-          <View style={styles.headerTop}>
-            <View style={styles.headerAction} />
-
-            <View style={styles.headerAction}>
-              <TouchableOpacity
-                onPress={() => {
-                  // handle onPress
-                }}>
-                <FeatherIcon
-                  color="#000"
-                  name="sliders"
-                  size={21} />
-              </TouchableOpacity>
-            </View>
+          <TouchableOpacity style={styles.addButton} onPress={() => openDetailsModal()}>
+            <Text style={styles.addButtonText}>Add House</Text>
+          </TouchableOpacity>
+          <View style={styles.searchBar}>
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search houses"
+              value={searchText}
+              onChangeText={setSearchText}
+            />
+            <FeatherIcon name="map-pin" size={24} color="#000" />
           </View>
-
-          <Text style={styles.headerTitle}>Places to stay</Text>
         </View>
 
         <ScrollView contentContainerStyle={styles.content}>
-          {places.map(
-            ({ id, img, name, dates, price, rating, reviews }, index) => {
-              const isSaved = saved.includes(id);
+          <Text style={styles.headerTitle}>Available Houses</Text>
+          {places.map((house) => {
+            const { id, img, name, dates, price, rating, reviews } = house;
+            const isSaved = saved.includes(id);
 
-              return (
-                <TouchableOpacity
-                  key={id}
-                  onPress={() => {
-                    // handle onPress
-                  }}>
-                  <View style={styles.card}>
-                    <View style={styles.cardLikeWrapper}>
-                      <TouchableOpacity onPress={() => handleSave(id)}>
-                        <View style={styles.cardLike}>
-                          <FontAwesome
-                            color={isSaved ? '#ea266d' : '#222'}
-                            name="heart"
-                            solid={isSaved}
-                            size={20} />
-                        </View>
-                      </TouchableOpacity>
+            return (
+              <View key={id} style={styles.card}>
+                <View style={styles.cardLikeWrapper}>
+                  <TouchableOpacity onPress={() => handleSave(id)}>
+                    <View style={styles.cardLike}>
+                      <FontAwesome
+                        color={isSaved ? '#ea266d' : '#222'}
+                        name="heart"
+                        solid={isSaved}
+                        size={20}
+                      />
                     </View>
+                  </TouchableOpacity>
+                </View>
 
-                    <View style={styles.cardTop}>
-                      <Image
-                        alt=""
-                        resizeMode="cover"
-                        style={styles.cardImg}
-                        source={{ uri: img }} />
-                    </View>
+                <View style={styles.cardTop}>
+                  <Image
+                    alt=""
+                    resizeMode="cover"
+                    style={styles.cardImg}
+                    source={{ uri: img }}
+                  />
+                </View>
 
-                    <View style={styles.cardBody}>
-                      <View style={styles.cardHeader}>
-                        <Text style={styles.cardTitle}>{name}</Text>
+                <View style={styles.cardBody}>
+                  <View style={styles.cardHeader}>
+                    <Text style={styles.cardTitle}>{name}</Text>
 
-                        <FontAwesome
-                          color="#ea266d"
-                          name="star"
-                          solid={true}
-                          size={12}
-                          style={{ marginBottom: 2 }} />
+                    <FontAwesome
+                      color="#ea266d"
+                      name="star"
+                      solid={true}
+                      size={12}
+                      style={{ marginBottom: 2 }}
+                    />
 
-                        <Text style={styles.cardStars}>{rating}</Text>
+                    <Text style={styles.cardStars}>{rating}</Text>
 
-                        <Text style={{ color: '#595a63' }}>
-                          ({reviews} reviews)
-                        </Text>
-                      </View>
-
-                      <Text style={styles.cardDates}>{dates}</Text>
-
-                      <Text style={styles.cardPrice}>
-                        <Text style={{ fontWeight: '600' }}>${price} </Text>/
-                        night
-                      </Text>
-                    </View>
+                    <Text style={{ color: '#595a63' }}>
+                      ({reviews} reviews)
+                    </Text>
                   </View>
-                </TouchableOpacity>
-              );
-            },
-          )}
+
+                  <Text style={styles.cardDates}>{dates}</Text>
+
+                  <Text style={styles.cardPrice}>
+                    <Text style={{ fontWeight: '600' }}>${price} </Text>/ night
+                  </Text>
+
+                  {/* Comment Input */}
+                  <TextInput
+                    style={styles.commentInput}
+                    placeholder="Leave a comment..."
+                    value={comment}
+                    onChangeText={setComment}
+                  />
+                  <TouchableOpacity style={styles.commentButton} onPress={() => handleCommentSubmit(id)}>
+                    <Text style={styles.commentButtonText}>Submit Comment</Text>
+                  </TouchableOpacity>
+
+                  {/* Edit and Delete Buttons */}
+                  <View style={styles.actionButtons}>
+                    <TouchableOpacity style={styles.editButton} onPress={() => openDetailsModal(house)}>
+                      <FeatherIcon name="edit" size={24} color="#4CAF50" />
+                      <Text>Edit</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.deleteButton} onPress={() => handleDeleteHouse(id)}>
+                      <FeatherIcon name="trash" size={24} color="#f44336" />
+                      <Text>Delete</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </View>
+            );
+          })}
         </ScrollView>
       </View>
+
+      {/* Add/Edit House Modal */}
+      <Modal
+        visible={detailsModalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={closeDetailsModal}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>{isEditing ? 'Edit House' : 'Add a New House'}</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Image URL"
+              value={formData.img}
+              onChangeText={(text) => setFormData({ ...formData, img: text })}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="House Name"
+              value={formData.name}
+              onChangeText={(text) => setFormData({ ...formData, name: text })}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Available Dates"
+              value={formData.dates}
+              onChangeText={(text) => setFormData({ ...formData, dates: text })}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Price per night"
+              keyboardType="numeric"
+              value={formData.price}
+              onChangeText={(text) => setFormData({ ...formData, price: text })}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Rating"
+              keyboardType="numeric"
+              value={formData.rating}
+              onChangeText={(text) => setFormData({ ...formData, rating: text })}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Reviews"
+              keyboardType="numeric"
+              value={formData.reviews}
+              onChangeText={(text) => setFormData({ ...formData, reviews: text })}
+            />
+            <TouchableOpacity style={styles.saveButton} onPress={handleFormSubmit}>
+              <Text style={styles.submitButtonText}>{isEditing ? 'Save Changes' : 'Add House'}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.cancelButton} onPress={closeDetailsModal}>
+              <Text style={styles.cancelButtonText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -159,29 +361,44 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     paddingHorizontal: 16,
   },
-  /** Header */
   header: {
     paddingHorizontal: 16,
     marginBottom: 12,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
-  headerTop: {
-    marginHorizontal: -6,
+  addButton: {
+    backgroundColor: '#ff6347',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  addButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    padding: 10,
+    backgroundColor: '#fff',
+    flex: 1,
+    marginLeft: 10,
   },
-  headerAction: {
-    width: 40,
-    height: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
+  searchInput: {
+    flex: 1,
+    padding: 10,
+    backgroundColor: '#f2f2f2',
+    borderRadius: 5,
+    marginRight: 10,
   },
   headerTitle: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: '#1d1d1d',
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 4,
   },
-  /** Card */
   card: {
     position: 'relative',
     borderRadius: 8,
@@ -251,6 +468,89 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#232425',
   },
+  commentInput: {
+    marginTop: 10,
+    padding: 10,
+    backgroundColor: '#f2f2f2',
+    borderRadius: 5,
+  },
+  commentButton: {
+    marginTop: 10,
+    backgroundColor: '#82d7f7',
+    paddingVertical: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  commentButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginTop: 10,
+  },
+  editButton: {
+    alignItems: 'center',
+  },
+  deleteButton: {
+    alignItems: 'center',
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalContent: {
+    width: '90%',
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    color: '#333',
+  },
+  input: {
+    width: '100%',
+    padding: 12,
+    backgroundColor: '#f9f9f9',
+    borderRadius: 8,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  saveButton: {
+    backgroundColor: '#4CAF50',
+    padding: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 10,
+    width: '100%',
+  },
+  submitButtonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  cancelButton: {
+    width: '100%',
+    padding: 15,
+    backgroundColor: '#f44336',
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  cancelButtonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+  }
 });
 
 export default RentHouse;
