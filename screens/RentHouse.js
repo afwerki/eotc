@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import FontAwesome from 'react-native-vector-icons/FontAwesome5';
 import FeatherIcon from 'react-native-vector-icons/Feather';
+import * as ImagePicker from 'expo-image-picker';  // Expo Image Picker
 
 const RentHouse = () => {
   const [places, setPlaces] = useState([]);
@@ -112,27 +113,64 @@ const RentHouse = () => {
     setDetailsModalVisible(false);
   };
 
+  // Handle image selection from the phone's library using expo-image-picker
+  const handleSelectImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission Denied', 'We need camera roll permissions to make this work!');
+      return;
+    }
+
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setFormData({ ...formData, img: result.assets[0].uri });
+    }
+  };
+
   // Handle form submission to add or edit a house
   const handleFormSubmit = async () => {
     const { img, name, dates, price, rating, reviews } = formData;
-
+  
     if (!img || !name || !dates || !price || !rating || !reviews) {
       Alert.alert("Please fill in all fields.");
       return;
     }
-
+  
+    const formDataToSend = new FormData();
+    formDataToSend.append('name', name);
+    formDataToSend.append('dates', dates);
+    formDataToSend.append('price', price);
+    formDataToSend.append('rating', rating);
+    formDataToSend.append('reviews', reviews);
+  
+    if (img) {
+      const uriParts = img.split('.');
+      const fileType = uriParts[uriParts.length - 1];
+      formDataToSend.append('img', {
+        uri: img,
+        name: `photo.${fileType}`,
+        type: `image/${fileType}`,
+      });
+    }
+  
     try {
       const response = await fetch(
         isEditing ? `${apiUrl}/${selectedHouseId}` : apiUrl,
         {
           method: isEditing ? 'PUT' : 'POST',
+          body: formDataToSend, // Send form data
           headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(formData)
+            Accept: 'application/json',
+          }
         }
       );
-
+  
       if (response.ok) {
         fetchPlaces(); // Refresh the list
         closeDetailsModal();
@@ -146,7 +184,7 @@ const RentHouse = () => {
       Alert.alert('Error', 'An error occurred. Please try again.');
     }
   };
-
+  
   // Handle deleting a house
   const handleDeleteHouse = async (id) => {
     try {
@@ -209,7 +247,8 @@ const RentHouse = () => {
           {places.map((house) => {
             const { id, img, name, dates, price, rating, reviews } = house;
             const isSaved = saved.includes(id);
-
+              // Log the image URL being formed
+  console.log(`Image URL: https://c17f-92-236-121-121.ngrok-free.app${img}`);
             return (
               <View key={id} style={styles.card}>
                 <View style={styles.cardLikeWrapper}>
@@ -226,12 +265,13 @@ const RentHouse = () => {
                 </View>
 
                 <View style={styles.cardTop}>
-                  <Image
-                    alt=""
-                    resizeMode="cover"
-                    style={styles.cardImg}
-                    source={{ uri: img }}
-                  />
+                <Image
+                     alt=""
+                       resizeMode="cover"
+                      style={styles.cardImg}
+                        source={{ uri: `https://c17f-92-236-121-121.ngrok-free.app${img}` }} // Add the full API URL here
+                       />
+
                 </View>
 
                 <View style={styles.cardBody}>
@@ -298,12 +338,17 @@ const RentHouse = () => {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>{isEditing ? 'Edit House' : 'Add a New House'}</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Image URL"
-              value={formData.img}
-              onChangeText={(text) => setFormData({ ...formData, img: text })}
-            />
+
+            {/* Image Picker Button */}
+            <TouchableOpacity onPress={handleSelectImage} style={styles.imagePickerButton}>
+              <Text style={styles.imagePickerButtonText}>Pick Image</Text>
+            </TouchableOpacity>
+
+            {/* Display selected image */}
+            {formData.img ? (
+              <Image source={{ uri: formData.img }} style={styles.selectedImage} />
+            ) : null}
+
             <TextInput
               style={styles.input}
               placeholder="House Name"
@@ -550,7 +595,24 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
-  }
+  },
+  imagePickerButton: {
+    backgroundColor: '#008CBA',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    marginBottom: 10,
+  },
+  imagePickerButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  selectedImage: {
+    width: 100,
+    height: 100,
+    marginBottom: 10,
+  },
 });
 
 export default RentHouse;
