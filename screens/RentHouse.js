@@ -34,7 +34,7 @@ const RentHouse = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [selectedHouseId, setSelectedHouseId] = useState(null);
 
-  const apiUrl = 'https://c17f-92-236-121-121.ngrok-free.app/api/rent-house'; // Replace with your actual API URL
+  const apiUrl = 'https://6a80-92-236-121-121.ngrok-free.app/api/rent-house'; // Replace with your actual API URL
 
   useEffect(() => {
     fetchPlaces();
@@ -81,32 +81,35 @@ const RentHouse = () => {
   );
 
   // Open the modal to add a new house
-  const openDetailsModal = (house = null) => {
-    if (house) {
-      setFormData({
-        img: house.img,
-        name: house.name,
-        dates: house.dates,
-        price: house.price,
-        rating: house.rating,
-        reviews: house.reviews
-      });
-      setIsEditing(true);
-      setSelectedHouseId(house.id);
-    } else {
-      setFormData({
-        img: '',
-        name: '',
-        dates: '',
-        price: '',
-        rating: '',
-        reviews: ''
-      });
-      setIsEditing(false);
-      setSelectedHouseId(null);
-    }
-    setDetailsModalVisible(true);
-  };
+  // Open the modal to add a new house or edit an existing one
+const openDetailsModal = (house = null) => {
+  if (house) {
+    setFormData({
+      img: house.img || '', // Populate the image path
+      name: house.name || '', // Populate the house name
+      dates: house.dates || '',
+      price: house.price || '', // Populate the price
+      rating: house.rating || '',
+      reviews: house.reviews || ''
+    });
+    setIsEditing(true);
+    setSelectedHouseId(house.id);
+  } else {
+    // Clear form data for adding a new house
+    setFormData({
+      img: '',
+      name: '',
+      dates: '',
+      price: '',
+      rating: '',
+      reviews: ''
+    });
+    setIsEditing(false);
+    setSelectedHouseId(null);
+  }
+  setDetailsModalVisible(true);
+};
+
 
   // Close the add/edit house modal
   const closeDetailsModal = () => {
@@ -247,8 +250,11 @@ const RentHouse = () => {
           {places.map((house) => {
             const { id, img, name, dates, price, rating, reviews } = house;
             const isSaved = saved.includes(id);
-              // Log the image URL being formed
-  console.log(`Image URL: https://c17f-92-236-121-121.ngrok-free.app${img}`);
+
+            // Check if img is external URL or a local path, and construct the full URL
+            const fullImageUrl = img.startsWith('http') ? img : `https://6a80-92-236-121-121.ngrok-free.app${img}`;
+            console.log(`Image URL: ${fullImageUrl}`); // Log the image URL
+
             return (
               <View key={id} style={styles.card}>
                 <View style={styles.cardLikeWrapper}>
@@ -265,13 +271,12 @@ const RentHouse = () => {
                 </View>
 
                 <View style={styles.cardTop}>
-                <Image
-                     alt=""
-                       resizeMode="cover"
-                      style={styles.cardImg}
-                        source={{ uri: `https://c17f-92-236-121-121.ngrok-free.app${img}` }} // Add the full API URL here
-                       />
-
+                  <Image
+                    alt=""
+                    resizeMode="cover"
+                    style={styles.cardImg}
+                    source={{ uri: fullImageUrl }} // Use the correct image URL
+                  />
                 </View>
 
                 <View style={styles.cardBody}>

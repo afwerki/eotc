@@ -29,7 +29,7 @@ const Work = ({ navigation }) => {
   const [repliesVisible, setRepliesVisible] = useState({});
   const [lastTap, setLastTap] = useState(null);
 
-  const apiUrl = 'https://c17f-92-236-121-121.ngrok-free.app';
+  const apiUrl = 'https://6a80-92-236-121-121.ngrok-free.app';
 
   useEffect(() => {
     fetchUserId();

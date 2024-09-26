@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   StyleSheet,
   SafeAreaView,
@@ -6,31 +6,157 @@ import {
   Text,
   TouchableOpacity,
   View,
-  Image,
   TextInput,
   Modal,
   Button,
+  Alert,
+  ActivityIndicator,
 } from "react-native";
 import FeatherIcon from 'react-native-vector-icons/Feather';
-import { Link } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const API_URL = "https://6a80-92-236-121-121.ngrok-free.app/api/mezmur";  // Replace with your backend API URL
 
 const MezmurScreen = () => {
+  const [mezmurs, setMezmurs] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredItems, setFilteredItems] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedItem, setSelectedItem] = useState(null);
+  const [selectedMezmur, setSelectedMezmur] = useState(null);
+  const [formData, setFormData] = useState({ title: "", body: "", user_id: 1 });
+  const [loading, setLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [userId, setUserId] = useState(null);
+  const [lastTap, setLastTap] = useState(null);
 
-  const items = [
-    {
-      img: "https://plus.unsplash.com/premium_photo-1677439907866-938da05a0ee0?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      title: "ሀኪም ሰብለ በእርግዝና ዙሪያ ለሴቶች ትምህርት መስጠት ትፈልጋለች።",
-      author: "አፍወርቅ",
-      authorImg: "https://media.istockphoto.com/id/157189484/photo/icon-madonna-with-child.webp?b=1&s=170667a&w=0&k=20&c=u90v28mLh8n2gW26vBHlpoMbRdxn8kk_TSTKToYslME=",
-      tag: "የማሪያም መዝሙር",
-      date: "Mar, 2023",
-    },
-    // Add more items here
-  ];
+  useEffect(() => {
+    fetchUserId();
+  }, []);
+
+  useEffect(() => {
+    if (userId !== null) {
+      fetchMezmurs();
+    }
+  }, [userId]);
+
+  const fetchUserId = async () => {
+    try {
+      const id = await AsyncStorage.getItem('userId');
+      setUserId(parseInt(id));
+    } catch (error) {
+      console.error('Error fetching user ID:', error.message);
+    }
+  };
+
+  const fetchMezmurs = async () => {
+    try {
+      const response = await fetch(API_URL);
+      const data = await response.json();
+      setMezmurs(data);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching mezmurs:", error);
+      setLoading(false);
+    }
+  };
+
+  const openModal = (mezmur = null, editMode = false) => {
+    if (!mezmur) {
+      setFormData({
+        title: '',
+        body: '',
+        user_id: userId,
+      });
+    } else {
+      setFormData({
+        title: mezmur.title || '',
+        body: mezmur.body || '',
+        user_id: mezmur.user_id || userId,
+      });
+    }
+    setSelectedMezmur(mezmur || null);
+    setModalVisible(true);
+    setIsEditing(editMode);
+  };
+
+  const closeModal = () => {
+    setModalVisible(false);
+    setSelectedMezmur(null);
+    setIsEditing(false);
+  };
+
+  const handleDeleteMezmur = async (mezmurId) => {
+    const mezmur = mezmurs.find(m => m.id === mezmurId);
+    if (!mezmur || mezmur.user_id !== userId) {
+      Alert.alert('Error', 'You can only delete mezmurs you have uploaded.');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/${mezmurId}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        fetchMezmurs();
+        closeModal();
+      } else {
+        alert('Failed to delete mezmur. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error during mezmur deletion:', error.message);
+      alert('An error occurred. Please try again.');
+    }
+  };
+
+  const handleFormSubmit = async () => {
+    const { title, body } = formData;
+
+    if (!title || !body) {
+      alert("Please fill in all required fields.");
+      return;
+    }
+
+    try {
+      let response;
+      if (isEditing && selectedMezmur) {
+        response = await fetch(`${API_URL}/${selectedMezmur.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData),
+        });
+      } else {
+        response = await fetch(API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData),
+        });
+      }
+
+      if (response.ok) {
+        fetchMezmurs();
+        closeModal();
+      } else {
+        alert('Failed to update mezmur. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error during mezmur submission:', error.message);
+      alert('An error occurred. Please try again.');
+    }
+  };
+
+  const handleDoubleTap = (mezmur) => {
+    const now = Date.now();
+    if (lastTap && (now - lastTap) < 300) {
+      openModal(mezmur, true);
+    } else {
+      setLastTap(now);
+    }
+  };
 
   const filterItems = (searchTerm) => {
     setSearchTerm(searchTerm);
@@ -38,91 +164,60 @@ const MezmurScreen = () => {
       setFilteredItems([]);
       return;
     }
-    const filtered = items.filter(item =>
+    const filtered = mezmurs.filter(item =>
       item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.tag.toLowerCase().includes(searchTerm.toLowerCase())
+      item.body.toLowerCase().includes(searchTerm.toLowerCase())
     );
     setFilteredItems(filtered);
   };
 
-  const openModal = (item) => {
-    setSelectedItem(item);
-    setModalVisible(true);
-  };
-
-  const closeModal = () => {
-    setModalVisible(false);
-  };
-
-  const trimTitle = (title) => {
-    const words = title.split(' ');
-    if (words.length > 10) {
-      return words.slice(0, 10).join(' ') + '...';
-    }
-    return title;
-  };
+  if (loading) {
+    return (
+      <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#82d7f7" />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView>
-        <View style={styles.main}>
-          <Link href="/upload/Upload_mezmur" style={{ textDecorationLine: 'underline' }}>
-            Upload Mezmur
-          </Link>
-          <View style={styles.headerSearch}>
-            <View style={styles.headerSearchIcon}>
-              <FeatherIcon color="#778599" name="search" size={17} />
-            </View>
-            <TextInput
-              autoCapitalize="words"
-              autoComplete="name"
-              placeholder="Search..."
-              placeholderTextColor="#778599"
-              style={styles.headerSearchInput}
-              onChangeText={filterItems}
-              value={searchTerm}
-            />
-          </View>
-          <View style={{
-            height: 1,
-            backgroundColor: '#ccc',
-            marginVertical: 10,
-          }}></View>
-          {(searchTerm ? filteredItems : items).map((item, index) => {
-            return (
-              <TouchableOpacity key={index} onPress={() => openModal(item)}>
-                <View style={styles.card}>
-                  <Image
-                    alt=""
-                    resizeMode="cover"
-                    source={{ uri: item.img }}
-                    style={styles.cardImg}
-                  />
-                  <View style={styles.cardBody}>
-                    <Text style={styles.cardTag}>{item.tag}</Text>
-                    <Text style={styles.cardTitle}>{trimTitle(item.title)}</Text>
-                    <View style={styles.cardRow}>
-                      <View style={styles.cardRowItem}>
-                        <Image
-                          alt=""
-                          source={{ uri: item.authorImg }}
-                          style={styles.cardRowItemImage}
-                        />
-                        <Text style={styles.cardRowItemText}>{item.author}</Text>
-                      </View>
-                      <Text style={styles.cardRowDivider}>.</Text>
-                      <View style={styles.cardRowItem}>
-                        <Text style={styles.cardRowItemText}>{item.date}</Text>
-                      </View>
-                    </View>
-                  </View>
-                </View>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => openModal()} style={styles.addButton}>
+          <Text style={styles.addButtonText}>Add Mezmur</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.searchBar}>
+        <FeatherIcon color="#778599" name="search" size={17} style={styles.searchIcon} />
+        <TextInput
+          placeholder="Search..."
+          placeholderTextColor="#778599"
+          style={styles.searchInput}
+          onChangeText={filterItems}
+          value={searchTerm}
+        />
+      </View>
+
+      <ScrollView style={styles.scrollContainer}>
+        {(searchTerm ? filteredItems : mezmurs).map((item, index) => (
+          <TouchableOpacity key={index} onPress={() => handleDoubleTap(item)} style={styles.card}>
+            <View style={styles.cardHeader}>
+              <Text style={styles.cardTitle}>{item.title}</Text>
+              <TouchableOpacity onPress={() => openModal(item, true)}>
+                <FeatherIcon name="edit" size={20} color="green" />
               </TouchableOpacity>
-            );
-          })}
-        </View>
+            </View>
+            <Text style={styles.cardBody}>{item.body}</Text>
+            <View style={styles.cardFooter}>
+              <Text style={styles.cardDate}>Uploaded by: {item.user_id}</Text>
+              <TouchableOpacity onPress={() => handleDeleteMezmur(item.id)}>
+                <FeatherIcon name="trash" size={20} color="red" />
+              </TouchableOpacity>
+            </View>
+          </TouchableOpacity>
+        ))}
       </ScrollView>
+
       {/* Modal */}
       <Modal
         animationType="slide"
@@ -131,14 +226,25 @@ const MezmurScreen = () => {
         onRequestClose={closeModal}
       >
         <View style={styles.modalContainer}>
-          <SafeAreaView style={{ flex: 1 }}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>{selectedItem && selectedItem.title}</Text>
-              <Text style={styles.modalDescription}>{selectedItem && selectedItem.description}</Text>
-              {/* Add more item details here */}
-              <Button title="Close" onPress={closeModal} />
-            </View>
-          </SafeAreaView>
+          <View style={styles.modalContent}>
+            <TextInput
+              placeholder="Mezmur Title"
+              value={formData.title}
+              onChangeText={(text) => setFormData({ ...formData, title: text })}
+              style={styles.input}
+            />
+            <TextInput
+              placeholder="Mezmur Body"
+              value={formData.body}
+              onChangeText={(text) => setFormData({ ...formData, body: text })}
+              style={styles.input}
+            />
+            <Button title={isEditing ? "Update Mezmur" : "Add Mezmur"} onPress={handleFormSubmit} />
+            {isEditing && (
+              <Button title="Delete Mezmur" onPress={() => handleDeleteMezmur(selectedMezmur?.id)} />
+            )}
+            <Button title="Close" onPress={closeModal} />
+          </View>
         </View>
       </Modal>
     </SafeAreaView>
@@ -148,105 +254,80 @@ const MezmurScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#e6f0fa',
+    backgroundColor: '#f2f2f2',
+    padding: 16,
   },
-  main: {
-    padding: 24,
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
   },
-  headerSearch: {
-    position: 'relative',
-    flexGrow: 1,
-    flexShrink: 1,
-    flexBasis: 0,
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  addButton: {
+    backgroundColor: '#ff6347',
+    padding: 10,
+    borderRadius: 8,
+  },
+  addButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#F0F0F0',
     borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'row',
+    paddingHorizontal: 10,
+    marginBottom: 16,
   },
-  headerSearchIcon: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    left: 0,
-    width: 34,
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 2,
+  searchIcon: {
+    marginRight: 8,
   },
-  headerSearchInput: {
+  searchInput: {
+    flex: 1,
     paddingVertical: 8,
-    paddingHorizontal: 12,
-    paddingLeft: 34,
-    width: '100%',
-    fontSize: 16,
-    fontWeight: '500'
+  },
+  scrollContainer: {
+    flex: 1,
   },
   card: {
-    flexDirection: "row",
-    alignItems: "stretch",
-    borderRadius: 12,
+    backgroundColor: '#fff',
+    padding: 16,
+    borderRadius: 8,
     marginBottom: 16,
-    backgroundColor: "#fff",
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 5 },
+    elevation: 3,
   },
-  cardImg: {
-    width: 96,
-    height: 96,
-    borderRadius: 12,
-  },
-  cardBody: {
-    flex: 1,
-    flexShrink: 1,
-    flexBasis: 0,
-    flexDirection: "column",
-    justifyContent: "flex-start",
-    paddingHorizontal: 16,
-  },
-  cardTag: {
-    fontWeight: "500",
-    fontSize: 12,
-    color: "#939393",
-    marginBottom: 7,
-    textTransform: "capitalize",
-  },
-  cardTitle: {
-    fontWeight: "600",
-    fontSize: 16,
-    lineHeight: 19,
-    color: "#000",
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     marginBottom: 8,
   },
-  cardRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: -8,
-    marginBottom: "auto",
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
   },
-  cardRowItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 6,
-    borderRightWidth: 1,
-    borderColor: "transparent",
+  cardBody: {
+    fontSize: 14,
+    color: '#333',
+    marginBottom: 8,
   },
-  cardRowItemImage: {
-    width: 22,
-    height: 22,
-    borderRadius: 9999,
-    marginRight: 6,
+  cardFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
-  cardRowItemText: {
-    fontWeight: "400",
-    fontSize: 13,
-    color: "#939393",
+  cardDate: {
+    fontSize: 12,
+    color: '#666',
   },
-  cardRowDivider: {
-    fontSize: 17,
-    fontWeight: "bold",
-    color: "#939393",
-  },
-  // Modal styles
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -260,14 +341,12 @@ const styles = StyleSheet.create({
     width: '80%',
     maxHeight: '80%',
   },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  modalDescription: {
-    fontSize: 16,
-    marginBottom: 20,
+  input: {
+    padding: 10,
+    marginVertical: 10,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
   },
 });
 
