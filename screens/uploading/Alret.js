@@ -53,7 +53,7 @@ const Alert = () => {
     }
 
     try {
-      const response = await axios.post('https://6a80-92-236-121-121.ngrok-free.app/api/alerts', {
+      const response = await axios.post('https://e0da-92-236-121-121.ngrok-free.app/api/alerts', {
         title,
         body,
         alert_type: alertType,

@@ -16,6 +16,7 @@ const items = [
   },
 ];
 
+
 export default function Example() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#f6f6f6' }}>

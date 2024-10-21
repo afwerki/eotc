@@ -8,7 +8,7 @@ import FeatherIcon from 'react-native-vector-icons/Feather';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { formatTimeAgo } from './utils';
 
-const Work = ({ navigation }) => {
+const Work = () => {
   const [saved, setSaved] = useState([]);
   const [searchText, setSearchText] = useState('');
   const [replies, setReplies] = useState({});
@@ -24,12 +24,13 @@ const Work = ({ navigation }) => {
     schedule: '',
     description: '',
   });
+
   const [isEditing, setIsEditing] = useState(false);
   const [userId, setUserId] = useState(null);
   const [repliesVisible, setRepliesVisible] = useState({});
   const [lastTap, setLastTap] = useState(null);
 
-  const apiUrl = 'https://6a80-92-236-121-121.ngrok-free.app';
+  const apiUrl = 'https://e0da-92-236-121-121.ngrok-free.app';
 
   useEffect(() => {
     fetchUserId();

@@ -15,7 +15,7 @@ import {
 import FeatherIcon from 'react-native-vector-icons/Feather';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API_URL = "https://6a80-92-236-121-121.ngrok-free.app/api/mezmur";  // Replace with your backend API URL
+const API_URL = "https://e0da-92-236-121-121.ngrok-free.app/api/mezmur";  // Replace with your backend API URL
 
 const MezmurScreen = () => {
   const [mezmurs, setMezmurs] = useState([]);
@@ -23,7 +23,7 @@ const MezmurScreen = () => {
   const [filteredItems, setFilteredItems] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedMezmur, setSelectedMezmur] = useState(null);
-  const [formData, setFormData] = useState({ title: "", body: "", user_id: 1 });
+  const [formData, setFormData] = useState({ title: "", lyrics: "", zemari: "", user_id: 1 });
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [userId, setUserId] = useState(null);
@@ -33,6 +33,7 @@ const MezmurScreen = () => {
     fetchUserId();
   }, []);
 
+  
   useEffect(() => {
     if (userId !== null) {
       fetchMezmurs();
@@ -64,13 +65,15 @@ const MezmurScreen = () => {
     if (!mezmur) {
       setFormData({
         title: '',
-        body: '',
+        lyrics: '',
+        zemari: '',
         user_id: userId,
       });
     } else {
       setFormData({
         title: mezmur.title || '',
-        body: mezmur.body || '',
+        lyrics: mezmur.lyrics || '',
+        zemari: mezmur.zemari || 'ሰንበት ትምህርት ቤት',
         user_id: mezmur.user_id || userId,
       });
     }
@@ -91,12 +94,16 @@ const MezmurScreen = () => {
       Alert.alert('Error', 'You can only delete mezmurs you have uploaded.');
       return;
     }
-
+  
     try {
       const response = await fetch(`${API_URL}/${mezmurId}`, {
         method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ user_id: userId }), // Include user_id in the request body
       });
-
+  
       if (response.ok) {
         fetchMezmurs();
         closeModal();
@@ -108,11 +115,12 @@ const MezmurScreen = () => {
       alert('An error occurred. Please try again.');
     }
   };
+  
 
   const handleFormSubmit = async () => {
-    const { title, body } = formData;
+    const { title, lyrics, zemari } = formData;
 
-    if (!title || !body) {
+    if (!title || !lyrics || !zemari) {
       alert("Please fill in all required fields.");
       return;
     }
@@ -166,7 +174,8 @@ const MezmurScreen = () => {
     }
     const filtered = mezmurs.filter(item =>
       item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.body.toLowerCase().includes(searchTerm.toLowerCase())
+      item.lyrics.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.zemari.toLowerCase().includes(searchTerm.toLowerCase())
     );
     setFilteredItems(filtered);
   };
@@ -199,24 +208,32 @@ const MezmurScreen = () => {
       </View>
 
       <ScrollView style={styles.scrollContainer}>
-        {(searchTerm ? filteredItems : mezmurs).map((item, index) => (
-          <TouchableOpacity key={index} onPress={() => handleDoubleTap(item)} style={styles.card}>
-            <View style={styles.cardHeader}>
-              <Text style={styles.cardTitle}>{item.title}</Text>
-              <TouchableOpacity onPress={() => openModal(item, true)}>
-                <FeatherIcon name="edit" size={20} color="green" />
-              </TouchableOpacity>
-            </View>
-            <Text style={styles.cardBody}>{item.body}</Text>
-            <View style={styles.cardFooter}>
-              <Text style={styles.cardDate}>Uploaded by: {item.user_id}</Text>
-              <TouchableOpacity onPress={() => handleDeleteMezmur(item.id)}>
-                <FeatherIcon name="trash" size={20} color="red" />
-              </TouchableOpacity>
-            </View>
+  {(searchTerm ? filteredItems : mezmurs).map((item, index) => (
+    <TouchableOpacity key={index} onPress={() => handleDoubleTap(item)} style={styles.card}>
+      <View style={styles.cardHeader}>
+        <Text style={styles.cardTitle}>{item.title}</Text>
+        {item.user_id === userId && (
+          <TouchableOpacity onPress={() => openModal(item, true)}>
+            <FeatherIcon name="edit" size={20} color="green" />
           </TouchableOpacity>
-        ))}
-      </ScrollView>
+        )}
+      </View>
+      <Text style={styles.cardBody}>{item.lyrics}</Text>
+      <Text style={styles.cardZemari}>በዘማሪ {item.zemari}</Text>
+      <View style={styles.cardFooter}>
+        {/* Display first_name instead of user_id */}
+        <Text style={styles.cardDate}>መዝሙሩ የተጫነው በ{item.first_name} ነው</Text>
+        {item.user_id === userId && (
+          <TouchableOpacity onPress={() => handleDeleteMezmur(item.id)}>
+            <FeatherIcon name="trash" size={20} color="red" />
+          </TouchableOpacity>
+        )}
+      </View>
+    </TouchableOpacity>
+  ))}
+</ScrollView>
+
+
 
       {/* Modal */}
       <Modal
@@ -234,9 +251,15 @@ const MezmurScreen = () => {
               style={styles.input}
             />
             <TextInput
-              placeholder="Mezmur Body"
-              value={formData.body}
-              onChangeText={(text) => setFormData({ ...formData, body: text })}
+              placeholder="Mezmur Lyrics"
+              value={formData.lyrics}
+              onChangeText={(text) => setFormData({ ...formData, lyrics: text })}
+              style={styles.input}
+            />
+            <TextInput
+              placeholder="Zemari"
+              value={formData.zemari}
+              onChangeText={(text) => setFormData({ ...formData, zemari: text })}
               style={styles.input}
             />
             <Button title={isEditing ? "Update Mezmur" : "Add Mezmur"} onPress={handleFormSubmit} />
@@ -317,6 +340,12 @@ const styles = StyleSheet.create({
   cardBody: {
     fontSize: 14,
     color: '#333',
+    marginBottom: 8,
+  },
+  cardZemari: {
+    fontSize: 14,
+    fontStyle: 'italic',
+    color: '#666',
     marginBottom: 8,
   },
   cardFooter: {
