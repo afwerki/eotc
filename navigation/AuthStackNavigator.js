@@ -3,9 +3,9 @@ import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import LoginScreen from '../screens/LoginScreen';
-import RegistrationScreen from '../screens/RegistrationScreen';
 import WelcomeScreen from '../screens/WelcomeScreen';
 import ForgotPasswordScreen from '../screens/ForgotPasswordScreen';
+import Registration from '../screens/RegistrationScreen';
 
 const Stack = createStackNavigator();
 
@@ -45,7 +45,7 @@ const AuthStackNavigator = () => {
       />
       <Stack.Screen
         name="Registration"
-        component={RegistrationScreen}
+        component={Registration}
         options={{ headerShown: false }}
       />
       <Stack.Screen
@@ -53,6 +53,7 @@ const AuthStackNavigator = () => {
         component={ForgotPasswordScreen}
         options={{ headerShown: false }}
       />
+
     </Stack.Navigator>
   );
 };

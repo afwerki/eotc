@@ -21,6 +21,7 @@ const ForgotPasswordScreen = ({ navigation }) => {
         },
         body: JSON.stringify({ email }),
       });
+      
 
       const result = await response.json();
 

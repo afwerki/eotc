@@ -34,7 +34,7 @@ const RentHouse = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [selectedHouseId, setSelectedHouseId] = useState(null);
 
-  const apiUrl = 'https://e0da-92-236-121-121.ngrok-free.app/api/rent-house'; // Replace with your actual API URL
+  const apiUrl = 'https://079f-92-236-121-121.ngrok-free.app/api/rent-house'; // Replace with your actual API URL
 
   useEffect(() => {
     fetchPlaces();
@@ -253,7 +253,7 @@ const openDetailsModal = (house = null) => {
             const isSaved = saved.includes(id);
 
             // Check if img is external URL or a local path, and construct the full URL
-            const fullImageUrl = img.startsWith('http') ? img : `https://e0da-92-236-121-121.ngrok-free.app${img}`;
+            const fullImageUrl = img.startsWith('http') ? img : `https://079f-92-236-121-121.ngrok-free.app${img}`;
             console.log(`Image URL: ${fullImageUrl}`); // Log the image URL
 
             return (

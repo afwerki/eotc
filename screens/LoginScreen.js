@@ -18,7 +18,7 @@ const LoginScreen = ({ navigation }) => {
     }
 
     try {
-      const response = await fetch('https://e0da-92-236-121-121.ngrok-free.app/api/login', {
+      const response = await fetch('https://079f-92-236-121-121.ngrok-free.app/api/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -85,7 +85,7 @@ const LoginScreen = ({ navigation }) => {
       <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
         <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => navigation.navigate('RegistrationScreen')}>
+      <TouchableOpacity onPress={() => navigation.navigate('Registration')}>
         <Text style={styles.registerText}>Don't have an account? Register</Text>
       </TouchableOpacity>
     </View>
@@ -139,9 +139,9 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   registerText: {
-    color: '#333',
+    color: '#82d7f7',
     textAlign: 'center',
-    fontSize: 16,
+    fontSize: 18,
   },
 });
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   View,
@@ -8,10 +8,11 @@ import {
   ScrollView,
   Alert,
   Image,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
-import Animated, { FadeInDown } from 'react-native-reanimated';
+import * as Location from 'expo-location';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { launchImageLibrary } from 'react-native-image-picker';
 
 const RegistrationScreen = ({ navigation }) => {
   const [step, setStep] = useState(1);
@@ -19,54 +20,77 @@ const RegistrationScreen = ({ navigation }) => {
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [age, setAge] = useState('');
-  const [username, setUsername] = useState('');
+  const [username, setUsername] = useState(''); // Username field added here
   const [password, setPassword] = useState('');
   const [gender, setGender] = useState('');
   const [maritalStatus, setMaritalStatus] = useState('');
-  const [profileImage, setProfileImage] = useState(null);
+  const [location, setLocation] = useState(null); // Store location data
 
-  const handleImagePick = () => {
-    launchImageLibrary({}, (response) => {
-      if (response.didCancel) {
-        Alert.alert('Cancelled', 'Image pick cancelled by user');
-      } else if (response.errorCode) {
-        Alert.alert('Error', response.errorMessage);
+  useEffect(() => {
+    requestLocationPermission();
+  }, []);
+
+  const requestLocationPermission = async () => {
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status === 'granted') {
+        getLocation(); // Automatically fetch location when permission is granted
       } else {
-        const source = { uri: response.assets[0].uri };
-        setProfileImage(source);
+        Alert.alert('Permission Denied', 'Location permission is required to register.');
       }
-    });
+    } catch (error) {
+      console.error('Error requesting location permission:', error);
+      Alert.alert('Error', 'An error occurred while requesting location permissions.');
+    }
+  };
+
+  const getLocation = async () => {
+    try {
+      const locationData = await Location.getCurrentPositionAsync({});
+      setLocation({
+        latitude: locationData.coords.latitude,
+        longitude: locationData.coords.longitude,
+      });
+      console.log('Location obtained:', locationData); // For debugging
+    } catch (error) {
+      Alert.alert('Error', 'Unable to get location. Please try again.');
+      console.error('Location Error:', error);
+    }
   };
 
   const handleRegister = async () => {
-    if (!email || !password || !firstName || !lastName || !age || !username || !profileImage) {
-      Alert.alert("Error", "Please fill out all fields and add a profile picture.");
+    console.log('Location state right before validation:', location); // For debugging
+  
+    // Ensure all fields are filled, and location has valid latitude and longitude
+    if (!email || !password || !firstName || !lastName || !age || !username || !location || typeof location.latitude !== 'number' || typeof location.longitude !== 'number') {
+      Alert.alert("Error", "Please fill out all fields and allow location access.");
       return;
     }
-
-    const registrationData = new FormData();
-    registrationData.append('first_name', firstName);
-    registrationData.append('last_name', lastName);
-    registrationData.append('email', email);
-    registrationData.append('age', age);
-    registrationData.append('username', username);
-    registrationData.append('password', password);
-    registrationData.append('gender', gender);
-    registrationData.append('marital_status', maritalStatus);
-    registrationData.append('profile_image', {
-      uri: profileImage.uri,
-      type: 'image/jpeg',
-      name: 'profile.jpg',
-    });
-
+  
+    const registrationData = {
+      first_name: firstName,
+      last_name: lastName,
+      email: email,
+      age: age,
+      username: username,
+      password: password,
+      gender: gender,
+      marital_status: maritalStatus,
+      latitude: location.latitude,
+      longitude: location.longitude,
+    };
+  
     try {
-      const response = await fetch('https://e0da-92-236-121-121.ngrok-free.app/api/register', {
+      const response = await fetch('https://079f-92-236-121-121.ngrok-free.app/api/register', {
         method: 'POST',
-        body: registrationData,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(registrationData),
       });
-
+  
       const result = await response.json();
-
+  
       if (response.status === 200) {
         Alert.alert("Success", "Registration successful!");
         navigation.navigate('Login');
@@ -78,178 +102,114 @@ const RegistrationScreen = ({ navigation }) => {
       console.error('Error during registration:', error);
     }
   };
+  
 
+  // Step 1: Login Access Form
   const loginAccess = () => (
-    <Animated.View entering={FadeInDown.delay(100).springify()} style={styles.form}>
-      <View style={styles.input}>
-        <Icon name="user" size={20} color="#007aff" style={styles.icon} />
-        <TextInput
-          autoCapitalize="none"
-          autoCorrect={false}
-          placeholder="Username"
-          style={styles.inputControl}
-          value={username}
-          onChangeText={setUsername}
-        />
-      </View>
-
-      <View style={styles.input}>
-        <Icon name="envelope" size={20} color="#007aff" style={styles.icon} />
-        <TextInput
-          autoCapitalize="none"
-          autoCorrect={false}
-          keyboardType="email-address"
-          placeholder="Email address"
-          placeholderTextColor="#6b7280"
-          style={styles.inputControl}
-          value={email}
-          onChangeText={setEmail}
-        />
-      </View>
-
-      <View style={styles.input}>
-        <Icon name="lock" size={20} color="#007aff" style={styles.icon} />
-        <TextInput
-          autoCorrect={false}
-          placeholder="Create Password"
-          placeholderTextColor="#6b7280"
-          style={styles.inputControl}
-          secureTextEntry={true}
-          value={password}
-          onChangeText={setPassword}
-        />
-      </View>
-
+    <View>
+      <Text style={styles.title}>Login Access</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Email"
+        value={email}
+        onChangeText={setEmail}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Password"
+        value={password}
+        secureTextEntry
+        onChangeText={setPassword}
+      />
       <View style={styles.formAction}>
-        <TouchableOpacity onPress={() => setStep(2)} style={styles.btnNext}>
+        <TouchableOpacity style={styles.btnNext} onPress={() => setStep(2)}>
           <Text style={styles.btnText}>Next</Text>
         </TouchableOpacity>
       </View>
-    </Animated.View>
+    </View>
   );
 
+  // Step 2: First and Last Names + Username
   const first_last_names = () => (
-    <Animated.View entering={FadeInDown.delay(100).springify()} style={styles.form}>
-      <View style={styles.input}>
-        <Icon name="user" size={20} color="#007aff" style={styles.icon} />
-        <TextInput
-          autoCapitalize="none"
-          autoCorrect={false}
-          placeholder="First Name"
-          style={styles.inputControl}
-          value={firstName}
-          onChangeText={setFirstName}
-        />
-      </View>
-
-      <View style={styles.input}>
-        <Icon name="user" size={20} color="#007aff" style={styles.icon} />
-        <TextInput
-          autoCapitalize="none"
-          autoCorrect={false}
-          placeholder="Last Name"
-          style={styles.inputControl}
-          value={lastName}
-          onChangeText={setLastName}
-        />
-      </View>
-
-      <View style={styles.input}>
-        <Icon name="transgender" size={20} color="#007aff" style={styles.icon} />
-        <TextInput
-          autoCapitalize="none"
-          autoCorrect={false}
-          placeholder="Gender"
-          style={styles.inputControl}
-          value={gender}
-          onChangeText={setGender}
-        />
-      </View>
-
+    <View>
+      <Text style={styles.title}>Enter Your Details</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="First Name"
+        value={firstName}
+        onChangeText={setFirstName}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Last Name"
+        value={lastName}
+        onChangeText={setLastName}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Username"  // Username input field added
+        value={username}
+        onChangeText={setUsername}
+      />
       <View style={styles.formAction}>
-        <TouchableOpacity onPress={() => setStep(1)} style={styles.btnBack}>
+        <TouchableOpacity style={styles.btnBack} onPress={() => setStep(1)}>
           <Text style={styles.btnText}>Back</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => setStep(3)} style={styles.btnNext}>
+        <TouchableOpacity style={styles.btnNext} onPress={() => setStep(3)}>
           <Text style={styles.btnText}>Next</Text>
         </TouchableOpacity>
       </View>
-    </Animated.View>
+    </View>
   );
 
+  // Step 3: Age and Marital Status
   const age_maritalStatus = () => (
-    <Animated.View entering={FadeInDown.delay(100).springify()} style={styles.form}>
-      <View style={styles.input}>
-        <Icon name="calendar" size={20} color="#007aff" style={styles.icon} />
-        <TextInput
-          autoCapitalize="none"
-          autoCorrect={false}
-          placeholder="Age"
-          style={styles.inputControl}
-          value={age}
-          onChangeText={setAge}
-        />
-      </View>
-
-      <View style={styles.input}>
-        <Icon name="heart" size={20} color="#007aff" style={styles.icon} />
-        <TextInput
-          autoCapitalize="none"
-          autoCorrect={false}
-          placeholder="Marital Status"
-          style={styles.inputControl}
-          value={maritalStatus}
-          onChangeText={setMaritalStatus}
-        />
-      </View>
-
-      <TouchableOpacity style={styles.imagePicker} onPress={handleImagePick}>
-        <Text style={styles.imagePickerText}>Pick a Profile Picture</Text>
-        {profileImage && <Image source={profileImage} style={styles.profileImage} />}
-      </TouchableOpacity>
-
+    <View>
+      <Text style={styles.title}>Personal Information</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Age"
+        value={age}
+        onChangeText={setAge}
+        keyboardType="numeric"
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Marital Status"
+        value={maritalStatus}
+        onChangeText={setMaritalStatus}
+      />
       <View style={styles.formAction}>
-        <TouchableOpacity onPress={() => setStep(2)} style={styles.btnBack}>
+        <TouchableOpacity style={styles.btnBack} onPress={() => setStep(2)}>
           <Text style={styles.btnText}>Back</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={handleRegister} style={styles.btnNext}>
-          <Text style={styles.btnText}>Sign up</Text>
+        <TouchableOpacity style={styles.btnNext} onPress={handleRegister}>
+          <Text style={styles.btnText}>Register</Text>
         </TouchableOpacity>
       </View>
-
-      <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-        <Text style={styles.formFooter}>
-          Already have an account?{" "}
-          <Text style={{ textDecorationLine: "underline" }}>Sign in</Text>
-        </Text>
-      </TouchableOpacity>
-    </Animated.View>
+    </View>
   );
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: "#fff" }}>
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Register</Text>
-          <Image
-            source={require("../assets/eotc.jpeg")}
-            style={styles.logo}
-          />
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={{ flex: 1 }}
+    >
+      <ScrollView style={{ flex: 1, backgroundColor: "#fff" }}>
+        <View style={styles.container}>
+          <View style={styles.header}>
+            <Text style={styles.title}>Register</Text>
+            <Image
+              source={require("../assets/eotc.jpeg")}
+              style={styles.logo}
+            />
+          </View>
+          {step === 1 && loginAccess()}
+          {step === 2 && first_last_names()}
+          {step === 3 && age_maritalStatus()}
         </View>
-        {step === 1 && loginAccess()}
-        {step === 2 && first_last_names()}
-        {step === 3 && age_maritalStatus()}
-        <TouchableOpacity
-          onPress={() => navigation.navigate('Login')}
-          style={styles.footerLink}
-        >
-          <Text style={styles.footerText}>
-            Already have an account?{" "}
-            <Text style={{ textDecorationLine: "underline" }}>Sign in</Text>
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -257,8 +217,6 @@ const styles = StyleSheet.create({
   container: {
     padding: 24,
     flexGrow: 1,
-    flexShrink: 1,
-    flexBasis: 0,
     justifyContent: 'center',
   },
   header: {
@@ -278,9 +236,6 @@ const styles = StyleSheet.create({
     marginBottom: 6,
     textAlign: "center",
   },
-  form: {
-    marginBottom: 24,
-  },
   input: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -291,46 +246,10 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: "#f9f9f9",
   },
-  icon: {
-    marginLeft: 10,
-  },
-  inputControl: {
-    flex: 1,
-    height: 44,
-    backgroundColor: "#f9f9f9",
-    paddingHorizontal: 10,
-    fontSize: 15,
-    fontWeight: "500",
-    color: "#222",
-  },
-  imagePicker: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginVertical: 16,
-  },
-  imagePickerText: {
-    color: '#007aff',
-    fontWeight: 'bold',
-    textDecorationLine: 'underline',
-  },
-  profileImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    marginTop: 10,
-  },
   formAction: {
     marginVertical: 24,
     flexDirection: "row",
     justifyContent: "space-between",
-  },
-  btn: {
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    backgroundColor: "#007aff",
   },
   btnBack: {
     backgroundColor: "#007aff",
@@ -349,21 +268,6 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     fontWeight: "600",
     color: "#fff",
-  },
-  formFooter: {
-    fontSize: 15,
-    fontWeight: "500",
-    color: "#222",
-    textAlign: "center",
-  },
-  footerLink: {
-    marginTop: 20,
-    alignItems: "center",
-  },
-  footerText: {
-    fontSize: 15,
-    fontWeight: "500",
-    color: "#007aff",
   },
 });
 

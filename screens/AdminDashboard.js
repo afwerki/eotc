@@ -36,7 +36,7 @@ const AdminDashboard = ({ navigation }) => {
                     return;
                 }
 
-                const response = await axios.get('https://e0da-92-236-121-121.ngrok-free.app/api/alerts/pending', {
+                const response = await axios.get('https://079f-92-236-121-121.ngrok-free.app/api/alerts/pending', {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }
@@ -55,7 +55,7 @@ const AdminDashboard = ({ navigation }) => {
     const handleAlertAction = async (alertId, action) => {
         try {
             const token = await AsyncStorage.getItem('token');
-            await axios.post(`https://e0da-92-236-121-121.ngrok-free.app/api/alerts/${alertId}/${action}`, {}, {
+            await axios.post(`https://079f-92-236-121-121.ngrok-free.app/api/alerts/${alertId}/${action}`, {}, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }

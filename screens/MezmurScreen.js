@@ -15,7 +15,7 @@ import {
 import FeatherIcon from 'react-native-vector-icons/Feather';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API_URL = "https://e0da-92-236-121-121.ngrok-free.app/api/mezmur";  // Replace with your backend API URL
+const API_URL = "https://079f-92-236-121-121.ngrok-free.app/api/mezmur";  // Replace with your backend API URL
 
 const MezmurScreen = () => {
   const [mezmurs, setMezmurs] = useState([]);
